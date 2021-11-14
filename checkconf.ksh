@@ -5,13 +5,13 @@
 #  
 #  checkconf.ksh [-help|-h] [-write|-w] <directory_or_file>
 #
-#  For <directory_or_file> argument is a file (*.asc, *.fcv, ...)
+#  If <directory_or_file> argument is a file (*.asc, *.fcv, ...)
 #       Make a diff between :
 #		- information from database 
 #		and
 #		- information from file		
 #		Work for *.asc and *.fcv
-#  For <directory_or_file> argument is a directory
+#  If <directory_or_file> argument is a directory
 #       Make a array (fileskeys.csv file) of all files (*.asc, *.fcv, ...) from the directory with all keys.
 #       Add information about key changes from database and keys double in the directory
 #       fileskeys.csv in indirectory : ${BasePath}/Repport
@@ -97,7 +97,9 @@ BasePath="$( cd $(dirname "$(readlink -f ${0})") ; pwd )"
 DataPath="${BasePath}/Files"
 commentHeader="${DataPath}/commentHeader.txt"
 keys="${DataPath}/keys.txt"
-fileFromTbtoasc="${DataPath}/fileFromTbtoasc.asc"
+fileFromTxtfile_asc="${DataPath}/fileFromTxtfile.asc"
+fileFromTbtoasc_asc="${DataPath}/fileFromTbtoasc.asc"
+fileFromTbtoascTemp_asc="${DataPath}/fileFromTbtoascTemp.asc"
 compareMessage="${DataPath}/compareMessage.txt"
 compareError="${DataPath}/compareError.txt"
 fileFromTxtfile_fcv="${DataPath}/fileFromTxtfile.fcv"
@@ -155,23 +157,30 @@ if [[ $fileExt = "asc" ]];
 	
 	# Build comment header
 	cat ${directoryOrFile} | awk '{if ($0 ~ /^[!]/) {print $0} else end}' 2>/dev/null > ${commentHeader}
-	cat ${commentHeader} > ${fileFromTbtoasc}
-	echo "!" >> ${fileFromTbtoasc}
-	echo "!  $(stamp)	:  checkconf  :  rewrite of key values ​​by tbtoasc - $fileName " >> ${fileFromTbtoasc}
-	echo "!" >> ${fileFromTbtoasc}
+	cat ${commentHeader} > ${fileFromTbtoasc_asc}
+	echo "!" >> ${fileFromTbtoasc_asc}
+	echo "!  $(stamp)	:  checkconf  :  rewrite of key values ​​by tbtoasc - $fileName " >> ${fileFromTbtoasc_asc}
+	echo "!" >> ${fileFromTbtoasc_asc}
 
 
-	# Build temp.asc file
+	# Build fileFromTbtoasc.asc file
 	for line in $(cat ${keys})
 	do
-			tbtoasc -e "$line" 2>/dev/null >> ${fileFromTbtoasc}
+			tbtoasc -e "$line" 2>/dev/null >> ${fileFromTbtoasc_asc}
 	done
 
 	#
 	# Compare tables
 	#
+	
+	# delete carriage return after '=' when there is data in fileFromTxtfile_asc
+	cat ${directoryOrFile} | sed -r ':a;N;$!ba;s/=\n([^\\])/=\1/g' 2>/dev/null > ${fileFromTxtfile_asc}
+	# delete carriage return after '=' when there is data in fileFromTbtoasc_asc
+	cat ${fileFromTbtoasc_asc} | sed -r ':a;N;$!ba;s/=\n([^\\])/=\1/g' 2>/dev/null > ${fileFromTbtoascTemp_asc}
+	cat ${fileFromTbtoascTemp_asc} 2>/dev/null > ${fileFromTbtoasc_asc}
 
-	compare_stdtbl ${fileFromTbtoasc} ${directoryOrFile} > ${compareMessage} 2> ${compareError} 
+	# compare fileFromTbtoasc_asc and fileFromTxtfile_asc
+	compare_stdtbl ${fileFromTbtoasc_asc} ${fileFromTxtfile_asc} > ${compareMessage} 2> ${compareError} 
 	
 	if [ -s $compareError ];
 	then
@@ -183,7 +192,7 @@ if [[ $fileExt = "asc" ]];
 		cat ${compareError}
 		print ""
 		print " For more details :"
-		print " ---> See "${fileFromTbtoasc}
+		print " ---> See "${fileFromTbtoasc_asc}
 		print " ---> See "${keys}
 		print ""
 		exit 1
@@ -200,7 +209,7 @@ if [[ $fileExt = "asc" ]];
 		more ${compareMessage}
 		print ""
 		print " For more details :"
-		print " ---> See "${fileFromTbtoasc}
+		print " ---> See "${fileFromTbtoasc_asc}
 		print " ---> See "${keys}
 		print ""
 	else
@@ -211,7 +220,7 @@ if [[ $fileExt = "asc" ]];
 		print ${directoryOrFile}" is same as from tbtoasc."
 		print ""
 		print " For more details :"
-		print " ---> See "${fileFromTbtoasc}
+		print " ---> See "${fileFromTbtoasc_asc}
 		print " ---> See "${keys}
 		print ""
 	fi
