@@ -1,7 +1,9 @@
 #!/usr/bin/ksh
 #
 #
-# Script: checkconf.ksh [-help|-h] [-write|-w] <directory_or_file>
+# Script : checkconf.ksh script make a diff between CBS/PSI configuration keys from database and keys from files (asc or fcv) 
+#  
+#  checkconf.ksh [-help|-h] [-write|-w] <directory_or_file>
 #
 #  For <directory_or_file> argument is a file (*.asc, *.fcv, ...)
 #       Make a diff between :
