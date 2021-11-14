@@ -1,0 +1,1446 @@
+[FCV#onix#pica]
+?line "pic_cs_idb_onix_tab_FCV_onix_pica.fcv" 1
+/*=============================================================================
+ * Copyright (c) 2008 by OCLC 
+ *
+ * File        : pic_cs_idb_onix_tab_FCV_onix_pica.fcv
+ * Description : Online formatter conversion table ONIX -> PICA
+ * Author(s)   : Jacqueline Oude Luttighuis
+ * Creation    : 28-08-08
+ *
+ * History:
+ * 28-08-2008  : JOL  : Creation
+ * 03-12-2008  : tonny    :  include files for publisher place/country no longer needed
+ *
+ * Notes       : At request KB #TEX and #MED(no permission) will not be not be converted
+ * 
+ *
+ * Note : records more than once in data present (onix20080827-mut-2van2.onx and 
+ *         onix20080828-mut-1van2.onx)
+ *          
+ *  08-11-2008	: tonny    : 201E subfield 0
+ *  04-12-2008  : jol      : format adapted for records with year 2010-2019
+ *  14-01-2009  : jol      : added #209A $d
+ *  22-01-2009  : jol      : adapted table status : 1st position in lowercase and removed Centraal
+ *                           Boekhuis from string
+ *  04-03-2010  : jol      : added table nur and adapted field AUT
+ *  05-03-2010  : jol	   : adapted field #DRU	
+ *  09-03-2010  : jol      : adapted MAKE_PRIJS: discountcode added
+ *  11-03-2010  : jol      : adapted table nur and field TIH
+ *  12-03-2010  : jol      : adapted MAKE_SOR: et al/et all removed
+ *  23-04-2010  : jol      : adapted MAKE_PRIJS (interspace added)
+ *  07-06-2010  : jol      : added CHECK_NUR
+ *=============================================================================
+ */
+
+/* 
+
+  include pic_cs_idb_onix_tab_FCV_publisher-place.fcv.i(onix_publisher_place)
+   include pic_cs_idb_onix_tab_FCV_countrycodes.fcv.i (onix_country)
+
+*/
+
+?line "./pic_cs_idb_onix_tab_FCV_languagecodes.fcv.i" 19
+?section onix_language
+
+table language =
+"ace" "ace", "ach" "aco", "ada" "ada", "afa" "afa", "afh" "ari",
+"afr" "afr", "ajm" "ajm", "aka" "aka", "akk" "akk", "alb" "alb",
+"ale" "ale", "alg" "alg", "amh" "amh", "ang" "ang", "apa" "apa",
+"ara" "ara", "arc" "ars", "arm" "arm", "arn" "arn", "arp" "arp",
+"art" "art", "arw" "arw", "asm" "asm", "ath" "ath", "ava" "awa",
+"ave" "ave", "awa" "aad", "aym" "aym", "aze" "aze", "bad" "bad",
+"bai" "bai", "bak" "bak", "bal" "bal", "bam" "bam", "ban" "bli",
+"baq" "bas", "bas" "baa", "bat" "bat", "bej" "bej", "bel" "wit",
+"bem" "bem", "ben" "ben", "ber" "ber", "bho" "bho", "bik" "bik",
+"bin" "bin", "bis" "bis", "bla" "bla", "bnt" "bnt", "bra" "bra",
+"bre" "bre", "btk" "btk", "bug" "bug", "bul" "bul", "bur" "bur",
+"cad" "cad", "cai" "ica", "cam" "cam", "car" "car", "cat" "cat",
+"cau" "kak", "ceb" "ceb", "cel" "kel", "cha" "cha", "chb" "chb",
+"che" "che", "chg" "chg", "chi" "chi", "chn" "chn", "cho" "cho",
+"chr" "chr", "chu" "slk", "chv" "tsj", "chy" "chy", "cmc" "cmc",
+"cop" "kop", "cor" "cor", "cpe" "sac", "cpf" "cpf", "cpp" "cpp", 
+"cre" "cre", "cro" "scr", "crp" "crp", "cus" "koe", "cze" "tse", 
+"dak" "dak", "dan" "dee", "day" "day", "del" "del", "din" "din", 
+"div" "div", "doi" "dog", "dra" "dra", "dua" "dua", "dum" "mnd", 
+"dut" "ned", "dyu" "dyu", "efi" "efi", "egy" "egy", "eka" "eka", 
+"elx" "ela", "eng" "eng", "enm" "enm", "esk" "esk", "esp" "esp", 
+"est" "est", "eth" "eth", "ewe" "ewe", "ewo" "ewo", "fan" "fan", 
+"far" "far", "fat" "fat", "fij" "fij", "fin" "fin", "fiu" "fio", 
+"fle" "ned", "fon" "fon", "fre" "fra", "fri" "fri", "frm" "frm", 
+"fro" "fro", "ful" "ful", "gaa" "gaa", "gae" "gae", "gag" "gag", 
+"gal" "gal", "gay" "gay", "gba" "gba", "gem" "ger", "geo" "geo", 
+"ger" "dui", "gil" "gil", "gle" "ier", "gmh" "dmh", "goh" "doh", 
+"gon" "gon", "gor" "gor", "got" "got", "grb" "grb", "grc" "grk", 
+"gre" "grn", "gua" "gua", "guj" "guj", "hai" "hai", "hau" "hau", 
+"haw" "haw", "heb" "heb", "her" "her", "hil" "hil", "him" "him", 
+"hin" "hin", "hmn" "hmn", "hun" "hon", "hup" "hup", "iba" "iba", 
+"ibo" "ibo", "ice" "ijs", "ijo" "ijo", "ilo" "ilo", "inc" "inc", 
+"ind" "ind", "ine" "ine", "int" "int", "ira" "ira", "iri" "ier", 
+"iro" "iro", "ita" "ita", "jav" "jav", "jpn" "jap", "jpr" "jpr", 
+"jrb" "jrb", "kaa" "kaa", "kab" "ber", "kac" "kac", "kam" "kam", 
+"kan" "kan", "kar" "kar", "kas" "kas", "kau" "kau", "kaw" "kaw", 
+"kaz" "kaz", "kha" "kha", "khi" "khi", "kho" "kho", "kik" "kik", 
+"kin" "kin", "kir" "kir", "kmb" "kmb", "kok" "kok", "kon" "kon", 
+"kor" "kor", "kpe" "kpe", "kro" "cru", "kru" "kru", "kua" "kua", 
+"kur" "kur", "kus" "kus", "kut" "kut", "lad" "jus", "lah" "lah", 
+"lam" "lam", "lan" "lan", "lao" "lao", "lap" "lap", "lat" "lat", 
+"lav" "let", "lin" "lin", "lit" "lit", "lol" "lol", "loz" "loz", 
+"lua" "lua", "lub" "lub", "lug" "lug", "lui" "lui", "lun" "lun", 
+"luo" "luo", "lus" "lus", "mac" "mac", "mad" "mdu", "mag" "mag", 
+"mah" "mah", "mai" "mai", "mak" "mak", "mal" "mly", "man" "mlk", 
+"mao" "mao", "map" "map", "mar" "mar", "mas" "mas", "max" "man", 
+"may" "mal", "mdr" "mdr", "men" "men", "mic" "mic", "min" "min", 
+"mis" "mis", "mkh" "mkh", "mla" "mad", "mlt" "mlt", "mni" "mni", 
+"mno" "mno", "moh" "moh", "mol" "mol", "mon" "mon", "mos" "mos", 
+"mul" "mul", "mun" "mun", "mus" "mus", "mwr" "mwr", "myn" "myn", 
+"nah" "nah", "nai" "ina", "nau" "nau", "nav" "nav", "nde" "nde", 
+"ndo" "ndo", "nep" "nep", "new" "new", "nia" "nia", "nic" "nic", 
+"niu" "niu", "non" "non", "nor" "noo", "nso" "nso", "nub" "nub", 
+"nya" "nya", "nym" "nym", "nyn" "nyn", "nyo" "nyo", "nzi" "nzi", 
+"oji" "oji", "ori" "ori", "osa" "osa", "oss" "oss", "ota" "ota", 
+"oto" "oto", "paa" "ppa", "pag" "pag", "pal" "pal", "pam" "pam", 
+"pan" "pan", "pap" "pap", "pau" "pau", "peo" "peo", "per" "per", 
+"phi" "phi", "pli" "pli", "pol" "poo", "pon" "pon", "por" "por", 
+"pra" "pra", "pro" "pro", "pus" "pas", "que" "que", "raj" "raj", 
+"rap" "rap", "rar" "rar", "roa" "roa", "roh" "rho", "rom" "zig", 
+"rum" "roe", "run" "run", "rus" "rus", "sad" "sad", "sag" "sag", 
+"sai" "iza", "sal" "sal", "sam" "sam", "san" "san", "sao" "sao", 
+"sas" "sas", "sat" "sat", "scc" "scc", "sco" "sco", "scr" "scr", 
+"sel" "sel", "sem" "sem", "sgn" "sgn", "shn" "shn", "sho" "sho", 
+"sid" "sid", "sio" "sio", "sit" "sit", "sla" "sla", "slo" "slo", 
+"slv" "slw", "snd" "snd", "snh" "snh", "snk" "snk", "sog" "sog", 
+"som" "som", "son" "son", "spa" "spa", "srr" "srr", "ssa" "ssa", 
+"sso" "sso", "suk" "suk", "sun" "sun", "sus" "sus", "sux" "soe", 
+"swa" "swa", "swe" "zwe", "swz" "swz", "syr" "syr", "tag" "tag", 
+"tah" "tah", "tai" "tai", "taj" "tad", "tam" "tam", "tar" "tat", 
+"tel" "tel", "tem" "tem", "ter" "ter", "tet" "tet", "tha" "tha", 
+"tib" "tib", "tig" "tig", "tir" "tir", "tiv" "tiv", "tkl" "tkl", 
+"tli" "tli", "tmh" "tmh", "tog" "tog", "ton" "ton", "tpi" "tpi", 
+"tru" "tru", "tsi" "tsi", "tso" "tso", "tsw" "tsw", "tuk" "tuk", 
+"tum" "tum", "tur" "tur", "tut" "tut", "tvl" "tvl", "twi" "twi", 
+"uga" "uga", "uig" "oei", "ukr" "oek", "umb" "umb", "und" "onb", 
+"urd" "urd", "uzb" "oes", "vai" "vai", "ven" "ven", "vie" "vie", 
+"vot" "wot", "wak" "wak", "wal" "wal", "war" "war", "was" "was", 
+"wel" "wel", "wen" "sor", "wol" "wol", "xho" "xho", "yao" "jao", 
+"yap" "yap", "yid" "jid", "yor" "jor", "zap" "zap", "zen" "zen", 
+"znd" "znd", "zul" "zul", "zun" "zun",
+default "onb";
+?line "pic_cs_idb_onix_tab_FCV_onix_pica.fcv" 43
+
+ format =
+          if set(#MAT$0)
+          [if ($(1 for 2) = "BB") MAKE_DAT
+           else if ($(1 for 2) = "BC") MAKE_DAT
+           else if ($(1 for 2) = "BD") MAKE_DAT
+           else if ($(1 for 2) = "DA") MAKE_DAT
+           else if ($(1 for 2) = "DB") MAKE_DAT
+           else if ($(1 for 2) = "AA") MAKE_DAT
+           else if ($(1 for 2) = "AC") MAKE_DAT
+           else ["INCORRECT MATERIAL : " $]
+          ]
+          else "MATERIAL FIELD NOT PRESENT"
+          ;
+
+
+MAKE_DAT =
+          if set(#DAT$0)
+           [if ($(1 for 3) = "200")
+             [if ($(4) !in "89") ["INCORRECT YEAR : " $(1 for 4)]
+              else if (view("", CHECK_COUNTRY) != "nl")
+                [
+                   ["INCORRECT COUNTRY : " view("", CHECK_COUNTRY)]
+                   or
+                   "INCORRECT ISBN"
+                ]
+              else if set_tag(#NUR) CHECK_NUR
+              else MAKE_REC
+             ]
+            else if ($(1 for 3) = "201")
+             [if (view("", CHECK_COUNTRY) != "nl")
+                [
+                   ["INCORRECT COUNTRY : " view("", CHECK_COUNTRY)]
+                   or
+                   "INCORRECT ISBN"
+                ]
+              else if set_tag(#NUR) CHECK_NUR
+              else MAKE_REC
+             ]
+             else ["INCORRECT YEAR : " $(1 for 4)]
+           ]
+           else ["NO YEAR PRESENT"]
+           ;
+
+
+
+
+ 
+/*
+CHECK_COUNTRY =
+           if (!set(#ISB$A)) "nl"
+           else country($(1 for 12))
+           ;
+*/
+
+CHECK_COUNTRY =
+           if set(#ISB$C) $
+           else "nl"
+           ;
+
+
+CHECK_NUR =
+            [if($b = "000") ["INCORRECT NUR CODE : " $]
+             else if($(1 for 2) = "01")
+             [if ($(3) = "0") MAKE_REC
+              else ["INCORRECT NUR CODE : " $]
+             ]
+             else if ($(1 for 2) = "02")
+             [if ($(3) in "123") ["INCORRECT NUR CODE : " $]
+              else MAKE_REC
+             ]
+             else if ($(1 for 2) = "05")
+             [if ($(3) in "124") ["INCORRECT NUR CODE : " $]
+              else MAKE_REC
+             ]
+             else MAKE_REC
+            ]
+            ;
+
+
+MAKE_REC =
+         reset_tag
+         strip(",")
+         [MAKE_002]   
+/*       [MAT]             Materiaalsoort                                   */
+/*       [#DAT]            Jaar van uitgave                                 */
+         [MAKE_007D]
+         [MAKE_YEAR]
+         [#TAA]          /* Taalcode                                         */
+         [MAKE_COU]
+         [#ISB]          /* ISBN                                             */
+         [#AUT].         /* Auteur                                           */
+         [#COR]          /* Corporatie                                       */
+         [#TIH]          /* Titel                                            */
+         [#DRU]          /* Druk/Editie                                      */
+/*       [#UIT]             Uitgever                                         */
+         reset_tag
+         [MAKE_UIT] 
+         [#PAG]          /* Paginering, aantal delen                         */
+         [#ILL]          /* Illustraties                                     */
+         [#HOO]          /* Formaat                                          */
+         reset_tag
+         [MAKE_034K]
+/*       [#DEE]             Annotatie                                        */
+         [MAKE_DEEL]
+         [#SER]          /* Serie                                            */
+         reset_tag
+         [#NUR]          /* NUR-code                                         */
+         reset_tag
+/*       [#TEX]             Tekst met eventuele link                         */
+         reset_tag
+         [MAKE_SUB]
+         reset_tag
+         [MAKE_208]
+         [MAKE_209]
+         [MAKE_201]
+         reset_tag
+         [MAKE_207F]
+         reset_tag
+/*       [#MED].            Media                                            */
+         reset_tag
+/*       [#PRI]             Informatie m.b.t prijs                           */ 
+         [MAKE_PRIJS]
+/*       if !present("#011@")  ["#011@ $a200X"]*/
+         if !present ("#033A") ["#033A $pS.l. $ns.n." ] 
+         if !present("#034I")  ["#034I $a.. cm"    ]
+         ;
+
+
+table item =
+"Opgaven" "Y", "Uitwerkingen" "Y", "Opgavenboek" "Y", 
+"Tekstboek" "Y", "Module" "Y", 
+default "N";
+
+/*table language =
+"und" "ned", "fre" "fra", "fry" "fri",
+default *;*/
+
+
+table file =
+"02" "HTML",
+default "";
+
+table nur =
+"000" "N", "011" "N", "012" "N", "013" "N", "014" "N",
+"015" "N", "016" "N", "017" "N", "018" "N", "019" "N", 
+"021" "N","022" "N", "023" "N", "051" "N", "052" "N", 
+"054" "N",
+default "Y";
+
+
+table relator =
+"A03" "aus",  "A05" "lyr",  "A06" "cmp",  "A07" "art",
+"A08" "pht",  "A09" "cre",  "A10" "cre",  "A11" "dsr",
+"A12" "ill",  "A13" "pht",  "A19" "aft",  "A21" "cmm",
+"A24" "aui",  "A29" "aui",  "A30" "prg",  "A32" "ctb",
+"A36" "cov",  "A99" "cre",  "B05" "adp",  "B06" "trl",
+"B08" "trl",  "B09" "edt",  "B10" "trl",  "B11" "edt",
+"B12" "edt",  "B13" "edt",  "B14" "edt",  "B15" "edt",
+"B16" "edt",  "B19" "edt",  "B20" "edt",  "B21" "edt",
+"B99" "adp",  "C01" "com",  "C99" "com",  "D01" "pro",
+"D02" "drt",  "D03" "cnd",  "D99" "drt",  "E01" "act",
+"E02" "dnc",  "E03" "nrt",  "E04" "cmm",  "E05" "voc",
+"E06" "itr",  "E08" "prf",  "E99" "prf",  "F01" "pht",
+default "";
+
+table relstring =
+"trl" "vert.", "adp" "red.", "ill" "ill.",
+default "*";
+
+
+table status =
+"01" "zal niet verschijnen",
+"02" "aangekondigd",
+"04" "verschenen of in herdruk. verschijningsdatum:",
+"07" "de titel is uitverkocht",
+"09" "deze informatie is niet (meer) bekend",
+"10" "in prijs opgeheven",
+default *;
+
+table text =
+"02" "Annotatie",
+"04" "Inhoudsopgave",
+"07" "Recensie",
+"09" "Commerciele tekst",
+"18" "Flaptekst",
+default "";
+
+table tolower =
+"A" "a",  "B" "b",  "C" "c",  "D" "d",  "E" "e",  "F" "f",  "G" "g",
+"H" "h",  "I" "i",  "J" "j",  "K" "k",  "L" "l",  "M" "m",  "N" "n",
+"O" "o",  "P" "p",  "Q" "q",  "R" "r",  "S" "s",  "T" "t",  "U" "u",
+"V" "v",  "W" "w",  "X" "x",  "Y" "y",  "Z" "z",
+ default *;
+
+
+
+/*
+get_place = [
+	       reset_tag
+               set(#ISB$A)
+               ["$p" place($(1 for 12))]
+            ];
+
+*/
+get_place = [
+	       reset_tag
+               if set(#ISB$T) [ "$p" $ ]
+	       else [ "$pS.l." ]
+            ];
+
+
+
+make_036E =
+     reset
+     ["#036E" occ(0,9) "$a" $a(2 to {" ; " ") (" ", ISSN "} ")" end)
+       [
+        ["$l" $(if " ; " * to {" ; " ") (" ", ISSN "} ")" end)]
+        ["#036E" occ(0,9) "$a" $(if ") (" * to {" ; " ") (" ", ISSN "} ")" end)]
+        ["$n" $(if ", ISSN " * to {" ; " ") (" ", ISSN "} ")" end)]
+       ].
+     ]
+     ;
+
+make_037A =
+     reset
+     ["#037A $a" $a]
+     ;
+
+make_037E =
+     reset
+     ["#037E $a" $a]
+     ;
+
+make_037P =
+     reset
+     ["#013@ $0Ab"]
+     ["#037E $a" $a]
+     ;
+
+MAKE_201 =
+           if set_tag(#STA)
+           [ if ($a(1 for 2) = "01")
+             [
+              ["#042@ $0DE"]
+              ["#201E/01 "
+               ["$01003:" target(reset_tag #208@/01$a)]
+              ]
+             ]
+             else fatal
+           ]
+           else fatal
+           ;  
+
+MAKE_207F =
+           if set_tag(#REC)
+           ["#207F/01 " 
+            "$lONIX"
+            ["$0" $0]
+           ]
+           ;
+
+MAKE_208 =  
+            if set(#DAT$0)
+            [if ($(1 for 3) = "200")
+             [if ($(4) in "89")
+              ["#208@/01 "  
+               "$a" $(7 for 2) "-" $(5 for 2) "-" $(3 for 2) 
+               "$bcd"
+              ]
+              else fatal
+             ]
+             else if ($(1 for 3) = "201")
+             ["#208@/01 "
+               "$a" $(7 for 2) "-" $(5 for 2) "-" $(3 for 2)
+               "$bcd"
+             ]
+             else fatal
+            ]
+            else fatal
+            ;
+
+
+MAKE_209 =
+           if present("#208@")
+           ["#209A/01 "
+            "$da" "$x00"
+           ]
+           else fatal
+           ;
+
+#MED =
+            "#209S/01 " 
+            [find($*)
+             if (code = "a")
+             [if ($(1 for 2) = "04")
+              "$zFront Cover Image"
+              else if ($(1 for 2) = "25")
+              "$zBack Cover Image"
+             ]
+             if (code = "b")
+             [ if ($(1 for 2) = "03")
+               "$0jpeg"
+             ]
+             if (code = "d")
+             ["$a" $]
+            ].
+            ;
+
+
+
+MAKE_021A =
+  [target(set_tag(#021T)
+    ["#021R "
+      "$a" $a(1 to { " = " " : [" " : " ": " } end)
+      [ 
+        [ "$d" $(if " : [" * to { "]" " : " ": " " = " " / "  } end) ].   
+        [ "$d" $(if " : " * to { " : " ": " " = " " / "  } end) ].
+        [ "$d" $(if ": " * to  { " : " ": " " = " " / "  } end) ].   
+        [ "$f" $(if " = " * to  { " : " ": " " = " " / "  } end) ]. 
+      ]. 
+      ["$d" $d]
+    ]
+    )
+  remove("#021T")
+  ]
+  [MAKE_SOR]
+  ;
+
+
+   copy_sub = "$" code[$] success; 
+     
+
+skip_et_al =
+             set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al" "  et al"} end)
+             ;
+
+
+
+MAKE_SOR =
+reset_tag
+ if set_tag(#AUT)
+ [reset_tag
+  "#099A "
+  [find_tag(#AUT)
+   if set($2)
+    [if ($ = "1")
+      [set($1)
+       target(reset_tag)
+       [find_tag(#****)].
+        if target(set($h))
+        [
+         ["$j$B" relator($)
+          [
+             ["$A" set($d) $
+              [ " " set($c) $]
+               " " skip_et_al 
+                  /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al" 
+                    " ...et al" "...et al" "  et al"} end)*/
+             ]
+             or
+             ["$A" skip_et_al
+                   /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+                     " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+             ]
+           ]
+          ]
+          or
+          ["$j"
+            [
+             [set($d) $
+              [ " " set($c) $]
+               " "  skip_et_al
+                   /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+                    " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+             ]
+             or
+             [skip_et_al
+              /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+               " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/]
+            ]
+          ]
+        ]
+       else
+        [
+          ["$h$B" relator($)
+            [
+             ["$A" set($d) $
+              [ " " set($c) $]
+              " " skip_et_al
+                  /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+                   " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+             ]
+             or
+             ["$A" skip_et_al
+                   /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+                    " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/]
+            ]
+          ]
+          or
+          ["$h"
+            [
+             [set($d) $
+              [ " " set($c) $]
+              " " skip_et_al
+                  /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+                   " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+             ]
+             or
+             [skip_et_al
+              /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+               " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/]
+            ]
+          ]
+        ]
+      ]
+     else
+      [", "
+        [
+          [set($d) $
+           [ " " set($c) $]
+           " " skip_et_al
+              /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+               " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+          ]
+          or
+          [skip_et_al
+           /*set($a) $(1 to {" ... et all" "... et all" " ... et al." "... et al." 
+            " ... et al" "... et al" " ...et al" "...et al" "  et al"} end)*/
+          ]
+        ]
+      ]
+     ]
+  ].
+ ]
+ target(reset_tag)
+ [target(set_tag(#021R)
+  "#021X "
+  [find($*)
+    copy_sub
+  ].
+  )
+ ]
+ [target(reset_tag
+  set_tag(#099A)
+  if set($B)
+   [reset
+     [find($*)
+      if (code = "B")
+       [relstring($)]
+      if (code = "h")
+       [if ($ = "")
+         ["$h" success]
+        else if ($ = "-") fatal
+        else
+         ["$h" $]
+       ]
+      if (code = "j")
+       [if ($ = "")
+         ["$j" success]
+        else
+         ["$j" $]
+       ]
+      if (code = "A")
+       [" " $]
+     ].
+   ]
+  else
+   [reset
+     [find($*)
+      if (code = "h")
+       [if ($ = "")
+         ["$h" success]
+        else if ($ = "-") fatal
+        else
+         ["$h" $]
+       ]
+      if (code = "j")
+       [if ($ = "")
+         ["$j" success]
+        else
+         ["$j" $]
+       ]
+      if (code = "A")
+       [" " $]
+     ].
+   ]
+  )
+ remove("#099A")
+ ]
+ target(reset_tag)
+ [target(set_tag(#021X)
+  "#021A "
+  [find($*)
+   if (code = "a")
+/*   ["$a" $]*/
+   [if (" / " in $)
+     ["$a" $(1 to " / ")
+      ["" $(*-2 for 1)
+          $(*+1 to " / " end)
+          [ "" $(if " / " *-2 for 1)
+               $(*+1 to  " / " end) 
+          ].
+      ]
+     ]
+     else
+     ["$a" $]
+   ]
+   if (code = "d")
+   [if (" / " in $)
+     ["$d" $(1 to " / ")
+      ["" $(*-2 for 1)
+          $(*+1 to " / " end)
+          [ "" $(if " / " *-2 for 1)
+               $(*+1 to  " / " end) 
+          ].
+/*        [ if $(" / " *-2 for 1)
+            [$(* +1 to " / " end)].
+          ]*/
+      ].
+     ]
+     else
+     ["$d" $]
+   ]
+   if (code = "h")
+   [
+    ["$h" $]
+    [ if find($h)
+     ["$j" $]
+    ].
+   ]
+  ].
+  )
+ ]
+ remove("#021R")
+ remove("#021X")
+ ;
+ 
+
+
+
+
+
+
+MAKE_002 =         
+            "#002@ $0Aaa"
+            ;
+
+
+
+MAKE_007D =
+           if set_tag(#REC)
+           ["#007D $lONIX"
+            ["$0" $0]
+           ]
+           ;
+
+MAKE_YEAR =
+           if set(#DAT$0)
+           [if (length($)>4)
+            [if ($(1 for 3) = "200")
+             [if ($(4) in "89")
+               [
+                ["#011@ $a" $(1 for 4)]
+                [if set(#STA$a)
+                  ["$n" status($)]
+                   reset_tag
+                   [set(#DAT$0)
+                    " " $(7 for 2) "-"
+                    $(5 for 2) "-"
+                    $(1 for 4)
+                   ]
+                  ]
+               ]
+               else fatal
+              ]
+              else if ($(1 for 3) = "201")
+              [
+                ["#011@ $a" $(1 for 4)]
+                [if set(#STA$a)
+                  ["$n" status($)]
+                   reset_tag
+                   [set(#DAT$0)
+                    " " $(7 for 2) "-"
+                    $(5 for 2) "-"
+                    $(1 for 4)
+                   ]
+                ]
+              ]
+              else fatal
+            ]
+            else if (length($) = "4")
+            [ if ($(1 for 3) = "200")
+               [ if ($(4) in "89")
+                 ["#011@ $a" $(1 for 4)]
+                 else fatal
+               ]
+               else if ($(1 for 3) = "201")
+               ["#011@ $a" $(1 for 4)]
+               else fatal
+            ]
+            else fatal
+           ]
+           else fatal
+           ;
+
+           
+
+
+#DAT =
+           if ($0(1) = "0")
+           ["#011@ $a200X"]
+           else if (length($)>4)
+           ["#011@ $a" $(1 for 4)]
+           else
+           ["#011@ $a" $]
+           ;
+
+#TAA =
+           "#010@ "
+           if ($1(1for 3) = "frr")
+           ["$afri"]
+           else if ($(1 for 3) = "frs")
+           ["$afri"]
+           else if ($(1 for 3) = "fry")
+           ["$afri"]
+           else if ($(1 for 3) = "dui")
+           ["$a" $]
+           else if ($(1 for 3) = "ned")
+           ["$a" $]
+           else
+           ["$a" (language($))]
+           ;
+
+
+MAKE_COU =
+           "#019@ $anl"
+           ;
+
+
+#ISB =
+         if set($0)
+         [if case_insensitive(checkdigit([ $(* to "-" end-1) ].) = $(end))
+          [
+           ["#004A $0" $]
+           reset_tag
+           [set(#MAT$0)
+            if ($(1 for 2) = "BB")
+            ["$ggeb."]
+            else if ($(1 for 2) = "BD")
+            ["$glosbl."]
+           ]
+          ]
+          else
+          ["#004D $0" $]
+         ]
+         else if set($A)
+         [if (EAN_checkdigit([ $(* to "-" end-1) ].) = $(end))
+          [
+           ["#004A $A" $]
+           reset_tag
+           [set(#MAT$0)
+            if ($(1 for 2) = "BB")
+            ["$ggeb."]
+            else if ($(1 for 2) = "BD")
+            ["$glosbl."]
+           ]
+          ]
+          else
+          ["#004D $A" $]
+         ]
+         ;
+
+
+
+#AUT =
+         if set($1)
+         [if($="A01")
+          [set($2)
+           if ($="1")
+           ["#028A "
+            ["$d" $d]
+            ["$c" $c]
+            [set($a)
+             if($ = "-") fatal
+             else 
+             [set($a)
+              ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                 " ...et al" "...et al"} end)*/
+              ]
+             ]
+            ]
+            [reset
+             ["$B" (relator($1))]
+            ] 
+           ]
+           else if ($="2")
+           ["#028B" occ(01,09)
+            ["$d" $d]
+            ["$c" $c]
+            ["$a" skip_et_al
+                  /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                   " ...et al" "...et al"}  end)*/]
+            [reset
+             ["$B" (relator($1))]
+            ]
+           ]
+           else if ($="3")
+           ["#028C" occ(01,09)
+            ["$d" $d]
+            ["$c" $c]
+            ["$a" skip_et_al
+                  /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/
+            ]
+            [reset
+             ["$B" (relator($1))]
+            ]
+           ]
+          ]
+          else if ($="A12")
+          ["#028C" occ(01,09)
+           ["$d" $d]
+           ["$c" $c]
+           ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/]
+           [reset
+             ["$B" (relator($1))]
+           ]
+          ]
+          else if ($="B01")
+          ["#028C" occ(01,09)
+           ["$d" $d]
+           ["$c" $c]
+           ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/]
+           [reset
+             ["$B" (relator($1))]
+           ]
+          ]
+          else if ($="B05")
+          ["#028C" occ(01,09)
+           ["$d" $d]
+           ["$c" $c]
+           ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/]
+           [reset
+             ["$B" (relator($1))]
+           ]
+          ]
+          else if ($="B06")
+          ["#028C" occ(01,09)
+           ["$d" $d]
+           ["$c" $c]
+           ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/]
+           [reset
+             ["$B" (relator($1))]
+           ]
+          ]
+          else if ($="Z99")
+          ["#028C" occ(01,09)
+           ["$d" $d]
+           ["$c" $c]
+           ["$a" skip_et_al
+                 /*$a(1 to {" ... et all" "... et all" " ... et al." "... et al." " ... et al" "... et al"
+                       " ...et al" "...et al"} end)*/]
+           [reset
+             ["$B" (relator($1))]
+           ]
+          ]
+         ]
+         ;
+
+
+
+#COR =
+         "#029F" occ(01,09)
+         "$a@" $3
+         ;
+
+
+#DRU =
+         if($a(1) = "1") fatal
+         else
+         ["#032@ "
+          "$g" $
+          "$a" $ "e dr"
+         ]
+         ;
+
+#TIH = 
+         ["#021T $a"
+           set($a)
+           make_at
+          ["$d" $d]
+         ]
+         [MAKE_021A]
+         ;
+
+make_at =
+          case_insensitive (if ($(1) = " ")   ["@" $(2 to end)                 ]
+          else if ($(1) = "@")                 ["@" $(2 to end)                 ]
+          else if ($(1 for 2) = "\" ")         [$(1 for 2) "@" $(3 to end)      ]
+          else if ($(1 for 5) = "\"... ")      [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1 for 4) = "\"...")       [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 4) = "...\"")       [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 5) = "..., ")       [$(1 for 4) "@" $(6 to end)      ]
+          else if ($(1 for 4) = "... ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 3) = "...")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1) = "[")                 [$(1) "@" $(2 to end)            ]
+          else if ($(1) = "(")                 [$(1) "@" $(2 to end)            ]   
+          else if ($(1) = "'")                 [$(1) "@" $(2 to end)            ]
+          else if ($(1 for 4) = "[De ")        [$(2 for 3) "@" $(* to "]" end)
+                                                    [$( if "]" * to end)]
+                                               ]
+          else if ($(1 for 5) = "[Het ")       [$(2 for 4) "@" $(* to "]" end)
+                                                    [$( if "]" * to end)]
+                                               ]
+          else if ($(1 for 5) = "[The ")       [$(2 for 4) "@" $(* to "]" end)
+                                                    [$( if "]" * to end)]
+                                               ]
+          else if ($(1) = "[")                 ["@" $(2 to { " [" "]"} end)
+                                                    [$( if "]" * to " [" end)]
+                                                    [$( if " [" * to "]" end)]
+                                               ]
+          else if ($(1 for 4) = "\"De ")       [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 5) = "\"Een ")      [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1 for 5) = "\"Het ")      [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1) = "\"")                [$(1) "@" $(2 to end)            ]
+          else if ($(1 for 4) = "'De ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 6) = "'t Is ")      [$(1 for 6) "@" $(7 to end)      ]
+          else if ($(1 for 3) = "'t ")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1 for 5) = "'Een ")       [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1 for 3) = "L'\l")        [$(1 for 2) "@" $(3 to end)      ]
+          else if ($(1 for 3) = "De ")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1 for 7) = "Het is ")     ["@" $                           ]
+          else if ($(1 for 8) = "Het was ")    ["@" $                           ]
+          else if ($(1 for 9) = "Het leken")   ["@" $                           ]
+          else if ($(1 for 4) = "Het ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 5) = "Een '")       [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1 for 4) = "Een ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 5) = "The \"")      [$(1 for 5) "@" $(6 to end)      ]
+          else if ($(1 for 4) = "The ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 3) = "An ")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1 for 2) = "A ")          [$(1 for 2) "@" $(3 to end)      ]
+          else if ($(1 for 3) = "Le ")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1 for 3) = "La ")         [$(1 for 3) "@" $(4 to end)      ]
+          else if ($(1 for 4) = "Les ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 4) = "Der ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 4) = "Die ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 4) = "Das ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 4) = "Ein ")        [$(1 for 4) "@" $(5 to end)      ]
+          else if ($(1 for 5) = "Eine ")       [$(1 for 5) "@" $(6 to end)      ]
+          else ["@" $ success ]
+          )
+          ;
+
+MAKE_UIT =
+           if set(#IMP$a)
+           [if ($(1 for 16) = "Alle Reisboeken ")
+             [set(#UIT$c)
+              if (", " in $)
+              ["#033T "
+ 	       get_place
+               set(#UIT$c)
+               skip($(1 to ", "))
+               "$n" $(* to end)
+               " " $(1 to ", ")
+              ]
+              else
+              ["#033T "
+	       get_place
+               set(#UIT$c)
+               "$n" $
+              ]
+             ]
+             else if (", " in $)
+             [ if ($(last - 12 for 13) = ", Uitgeverij")
+               [make_033T
+                 set(#IMP$a)
+                ["$n" $(1 to last -13)]
+               ]
+               else if ($(last -10 for 11) = ", b.v., uitg.")
+               [make_033T
+                set(#IMP$a)
+                "$n" $(1 to last -11)
+               ]
+               else
+               [make_033X]
+             ] 
+             else
+             [if ($(last -13 for 14) = "Uitgevers B.V.")
+               [make_033T
+                 set(#IMP$a)
+                ["$n" $(1 to last -14)]
+               ]
+              else if ($(last -14 for 15) = "B.V. Uitgeverij")
+               [make_033T
+                set(#IMP$a)
+                ["$n" $(1 to last -15)]
+               ]
+              else if case_insensitive($(last -3 for 4) = "B.V.")
+               [make_033T
+                set(#IMP$a)
+                ["$n" $(1 to last -4)]
+               ]
+              else if case_insensitive($(last -1 for 2) = "BV")
+               [make_033T
+                set(#IMP$a)
+                ["$n" $(1 to last -2)]
+               ]
+              else [make_033X]
+             ]
+           ] 
+           else if set(#UIT$c)
+           [if (", " in $)
+             [ if ($(last - 11 for 12) = ", Uitgeverij")
+               [make_033T
+                set(#UIT$c)
+                ["$n" $(1 to last -12)]
+               ]
+               else if ($(last -12 for 13) = ", b.v., uitg.")
+               [make_033T
+                set(#UIT$c)
+                "$n" $(1 to last -12)
+               ]
+               else
+               [make_033Y]
+              ]
+             else
+             [if ($(last -13 for 14) = "Uitgevers B.V.")
+               [make_033T
+                set(#UIT$c)
+                ["$n" $(1 to last -14)]
+               ]
+              else if ($(last -14 for 15) = "B.V. Uitgeverij")
+               [make_033T
+                set(#UIT$c)
+                ["$n" $(1 to last -15)]
+               ]
+               else if case_insensitive($(last -3 for 4) = "B.V.")
+               [make_033T
+                set(#UIT$c)
+                ["$n" $(1 to last -4)]
+               ]
+              else if case_insensitive($(last -1 for 2) = "BV")
+               [make_033T
+                set(#UIT$c)
+                ["$n" $(1 to last -2)]
+               ]
+              else 
+               [make_033Y]
+             ]
+            ]
+            target(reset_tag)
+            [target(find_tag(#033T)
+             "#033A "
+             [find($*)
+               if (code = "p")
+               ["$p" $(1 to {", Uitgeverij" "Uitgeverij" "uitgeverij" "BV" "B.V." ", bv" "bv" ", b.v." "b.v."} end)]
+               if (code = "n")
+               ["$n" $(1 to {", Uitgeverij" "Uitgeverij" "uitgeverij" "BV" "B.V." ", bv" "bv" ", b.v." "b.v."} end)]
+             ].
+             )
+            ].
+            target(reset_tag)
+            [target(find_tag(#033X)
+             "#033A "
+             [find($*)
+               if (code = "p")
+               ["$p" $]
+               if (code = "n")
+               [if ($(1 for 11) = "Uitgeverij ")
+                ["$n" $(12 to {" BV" " B.V." ", bv" " bv" ", b.v." " b.v."} end)]
+                else if case_insensitive($(1 for 5) = "B.V. ")
+                ["$n" $(6 to end)]
+                else if case_insensitive($(1 for 14) = ", b.v., uitg. ")
+                ["$n" $(15 to end)]
+                else if case_insensitive($(1 for 12) = "b.v., uitg. ")
+                ["$n" $(13 to end)]
+                else
+                ["$n" $(1 to {" b.v. Uitgeverij" " Uitgeverij BV" " uitg." " BV" " B.V." ", bv" " bv" ", b.v." " b.v."} end)]
+               ]
+             ].
+             )
+            ].
+            target(reset_tag)
+            [target(find_tag(#033Y)
+             "#033A "
+             [find($*)
+               if (code = "p")
+               ["$p" $]
+               if (code = "n")
+               [if ($(1 for 11) = "Uitgeverij ")
+                ["$n" $(12 to {" BV" " B.V." ", bv" " bv" ", b.v." " b.v."} end)]
+                else if case_insensitive($(1 for 5) = "B.V. ")
+                ["$n" $(6 to end)]
+                else if case_insensitive($(1 for 14) = ", b.v., uitg. ")
+                ["$n" $(15 to end)]
+                else if case_insensitive($(1 for 12) = "b.v., uitg. ")
+                ["$n" $(13 to end)]
+                else
+                ["$n" $(1 to {" b.v. Uitgeverij" " Uitgeverij BV" " uitg." " BV" " B.V." ", bv" " bv" ", b.v." " b.v."} end)]
+               ]
+             ].
+             )
+            ].
+            remove("#033T")
+            remove("#033X")
+            remove("#033Y")
+            ;
+           
+
+
+make_033T =
+            "#033T "
+	     get_place
+            ;
+
+
+make_033X =
+            reset
+            if (", " in $a)
+            ["#033X "
+	     get_place
+             set(#IMP$a)
+             skip($(1 to ", "))
+             "$n" $(* to end)
+             " " $(1 to ", ")
+            ]
+            else if (",\c" in $)
+            ["#033X "
+	     get_place
+             set(#IMP$a)
+             skip($(1 to ",\c"))
+             "$n" $(*-1 to end)
+             " " $(1 to ",\c")
+            ]
+            else
+            ["#033X "
+             get_place
+             set(#IMP$a)
+             "$n" $
+            ]
+            ;
+
+make_033Y =
+            reset
+            if (", " in $c)
+            ["#033Y "
+             get_place
+             set(#UIT$c)
+             skip($(1 to ", "))
+             "$n" $(* to end)
+             " " $(1 to ", ")
+            ]
+            else if (",\c" in $)
+            ["#033Y "
+             get_place
+             set(#UIT$c)
+             skip($(1 to ",\c"))
+             "$n" $(*-1 to end)
+             " " $(1 to ",\c")
+            ]
+            else
+            ["#033Y "
+             get_place
+             set(#UIT$c)
+             "$n" $
+            ]
+            ;
+
+
+
+
+#UIT =
+         "#033A "
+         "$pS.l."
+         "$n" $c
+         ;
+
+
+
+#PAG =
+         if set($0)
+         [
+          ["#034D $a" $]
+          ", "
+          [set($a)
+           "" $
+          ]
+         ]
+         else if set($a)
+         [if ($(1 for 7) = "\d\d\d\d\d\d\d")
+          ["#034D $a" $(1 for 3) " p"]
+          else if set($b)
+          ["#034D $a" $
+           set($a)
+           " (" $ ")"
+          ]
+          else
+          ["#034D $a" $]
+         ]
+         else if set ($b)
+         ["#034D $a" $]
+         else fatal
+         ;
+
+
+#ILL =
+         if set($c)
+         [if ($(1) = "1")
+          ["#034M $aill"]
+          else fatal
+         ]
+         ;
+         
+
+#HOO =
+        "#034I "
+         if ($b = "mm")
+         [set($a)
+          if scan($(1 to end -1), "%lu")
+          [if ($(end) !="0")
+           [scan(view ("", decimal (scanned_number +1)),"%lu")]
+          ]
+           "$a" scanned_number " cm"
+         ]
+         else 
+         [set ($a)
+          "$a" $
+         ]
+         ;
+
+
+MAKE_034K =
+            if set(#MAT$1)
+            ["#034K "
+             "$a" $
+            ]
+            ;
+
+
+
+MAKE_DEEL =
+            if set_tag(#DEE)
+            ["#047C $a" $a
+             [". " $b]
+            ]
+            else if set_tag(#ITE)
+            ["#047C $a" $a]
+            else fatal
+            ;
+
+
+
+#DEE =
+         "#047C "
+         "$a" $a
+         ;
+
+#SER =
+         "#036E $a"
+          set($a)
+          make_at
+         ["$l" $l]
+         ;
+
+
+MAKE_SUB =
+           if set(#DEE$0)
+           ["#036H $a" make_at]
+           else if set(#ITE$0)
+           ["#036H $a" make_at]
+           else if set(#SET$0)
+           ["#036H $a" make_at]
+           ;
+
+
+#NUR =
+         if(nur($b(1 for 3)) = "N") fatal
+         else
+         ["#045B "
+          "$a" $
+         ]
+         ;
+
+
+#TEX =
+         if set($e)
+         ["#209S" occ(01,09) 
+          reset
+          ["$z" (text($a))]
+          ["$0" (file($b))]
+          ["$a" $e]
+         ]
+         else
+         ["#037A "
+          ["$a" (text($a))]
+          [" " (file($b))]
+          [" "  $c]
+         ]
+         ;
+
+
+MAKE_PRIJS =
+              [if find_tag(#PRI)
+               [if ($a(1 for 2) = "02")
+                [
+                  ["#209V" occ(01,09) 
+                   if ($d(1) = "0") fatal
+                   else ["$a" $]
+                   ["$e" $e]
+                   [reset
+                    if ($b = "03")
+                    ["$c" $c]
+                   ]
+                  ]
+                ]
+                else if ($(1 for 2) = "12")
+                ["#209W/01 "
+                 "$a" $d
+                ]
+               ]
+              ].
+              [target(reset_tag)
+               [target(set_tag(#209V)
+                 "#209K/01 "
+                  if set($a)
+/*                [if ($(last -5 for 6) = ".\d EUR")
+                    ["$a" $(1 to last -4) "0"
+                          $(* to end)
+                    ]
+                   else
+                    ["$a" $(1 to end)]
+                  ]*/
+                  [if ($(last -1 for 2) = ".\d")
+                   [if set($e)
+                    [if ($(1 for 3) = "EUR")
+                     [set($a)
+                      ["$aeuro " $(1 to last) "0"]
+/*                    [if set ($c) "(" $ ")"]*/
+                     ]
+                     else 
+                     [set($a)
+                      ["$a" $(1 to last) "0"]
+                     ]
+                    ]
+                    else
+                    [set($a)
+                     ["$a" $(1 to last) "0"]
+                    ]
+                   ]
+                   else if ("." !in $)
+                   [if set($e)
+                    [if ($(1 for 3) = "EUR")
+                     [set($a)
+                      ["$aeuro " $ ".-"]
+                     ]
+                     else
+                     [set($a)
+                      ["$a" $ ".-"]
+                     ]
+                    ]
+                    else
+                    [set($a)
+                     ["$a" $ ".-"]
+/*                     [if set ($c) "(" $ ")"]*/
+                    ]
+                   ]
+                   else
+                   [if set($e)
+                    [if ($(1 for 3) = "EUR")
+                     [set($a)
+                      ["$aeuro " $ ]
+                     ]
+                     else
+                     [set($a)
+                      ["$a" $ ]
+                     ]
+                    ]
+                    else 
+                    [set($a)
+                     ["$a" $]
+                    ]
+                   ]
+                 ]
+                 )
+               ]
+               [target(set_tag(#209W)
+                 if ($a(last -1 for 2) = ".\d")
+                 [" (" $ "0)"]
+                 else
+                 [" (" $ ")"]
+                 )
+               ]
+              ]
+              [target(reset_tag)
+               [target(set_tag(#209V)
+                [if set ($c) " (" $ ")"]
+                )
+               ]
+              ]
+              "$x22"
+              remove("#209V")
+              remove("#209W")
+              ;
+
+
+\\

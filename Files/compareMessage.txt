@@ -1,0 +1,54 @@
+----- UPDATED KEY HERMES#CLASSPRF## ------------------------------------------------------------------------------------
+[HERMES#CLASSPRF##]
+[0;36m40,65c40,52[0;0m
+[0;31m< \PRSFULLOPTIONS=[0;0m
+[0;31m< application=cbspsi;script_sort_title=descending;script_sort_entry=no;wiki_markup=yes[0;0m
+[0;31m< \PRSFULLOPTIONS_mopc=[0;0m
+[0;31m< application=cbspsi;script_sort_title=descending;script_sort_entry=no;fmt=J;linebreak=no;wiki_markup=no[0;0m
+[0;31m< \PRSFULLOPTIONS_isbd=[0;0m
+[0;31m< application=cbspsi;script_sort_title=descending;script_sort_entry=no;wiki_markup=no[0;0m
+[0;31m< \PRSFULLOPTIONS_pica3=[0;0m
+[0;31m< application=cbspsi;script_sort=no;fmt=D;linebreak=no;wiki_markup=no[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcpica3=[0;0m
+[0;31m< application=cbspsi;script_sort=no;move_iln=yes;fmt=D;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF[0;0m
+[0;31m< \PRSFULLOPTIONS_ccweb-unimarc-cataloguing=[0;0m
+[0;31m< application=cbspsi;script_sort=no;move_iln=yes;fmt=UNM;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcpica3edit=[0;0m
+[0;31m< application=cbspsi;script_sort=no;move_iln=yes;fmt=D;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF;mode=edit[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcpica=[0;0m
+[0;31m< application=cbspsi;script_sort=no;move_iln=yes;fmt=P;linebreak=no;subfind=$;dollar=$$;wiki_markup=no;FILTER=FCV#pica#filterDEF[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcpicaxml=[0;0m
+[0;31m< application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcMARC21=[0;0m
+[0;31m< application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;directory=no;tag_sort=9**$5;owners=iln;denormalize=marc21-exchange;subfind=$;dollar=$$[0;0m
+[0;31m< \PRSFULLOPTIONS_MARC21=[0;0m
+[0;31m< application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;directory=no;tag_sort=9**$5;owners=iln[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcdaixml=[0;0m
+[0;31m< application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;31m< \PRSFULLOPTIONS_webggcdc=[0;0m
+[0;31m< application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;0m---[0;0m
+[0;32m> \PRSFULLOPTIONS=application=cbspsi;script_sort_title=descending;script_sort_entry=no;wiki_markup=yes[0;0m
+[0;32m> \PRSFULLOPTIONS_mopc=application=cbspsi;script_sort_title=descending;script_sort_entry=no;fmt=J;linebreak=no;wiki_markup=no[0;0m
+[0;32m> \PRSFULLOPTIONS_isbd=application=cbspsi;script_sort_title=descending;script_sort_entry=no;wiki_markup=no[0;0m
+[0;32m> \PRSFULLOPTIONS_pica3=application=cbspsi;script_sort=no;fmt=D;linebreak=no;wiki_markup=no[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcpica3=application=cbspsi;script_sort=no;move_iln=yes;fmt=D;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF[0;0m
+[0;32m> \PRSFULLOPTIONS_ccweb-unimarc-cataloguing=application=cbspsi;script_sort=no;move_iln=yes;fmt=UNM;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcpica3edit=application=cbspsi;script_sort=no;move_iln=yes;fmt=D;linebreak=no;wiki_markup=no;sort=7800_last;FILTER=FCV#pica#filterDEF;mode=edit[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcpica=application=cbspsi;script_sort=no;move_iln=yes;fmt=P;linebreak=no;subfind=$;dollar=$$;wiki_markup=no;FILTER=FCV#pica#filterDEF[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcpicaxml=application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcMARC21=application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;directory=no;tag_sort=9**$5;owners=iln;denormalize=marc21-exchange;subfind=$;dollar=$$[0;0m
+[0;32m> \PRSFULLOPTIONS_MARC21=application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;directory=no;tag_sort=9**$5;owners=iln[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcdaixml=application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;32m> \PRSFULLOPTIONS_webggcdc=application=cbspsi;script_sort=no;linebreak=no;wiki_markup=no[0;0m
+[0;36m68,69c55[0;0m
+[0;31m< \PRSFULLOPTIONS_UNM=[0;0m
+[0;31m< application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;owners=iln;dollar=$$[0;0m
+[0;0m---[0;0m
+[0;32m> \PRSFULLOPTIONS_UNM=application=cbspsi;script_sort_title=ascending;linebreak=no;linkage_renumber=title;wiki_markup=no;XPNOFF=Y;owners=iln;dollar=$$[0;0m
+[0;36m77,78c63[0;0m
+[0;31m< \STOPWORDS_9005=[0;0m
+[0;31m< at,au,be,br,ca,ch,de,dk,es,fi,fr,gb,hu,in,it,mx,nl,no,pl,pt,ro,ru,se,su,tr,us,zz[0;0m
+[0;0m---[0;0m
+[0;32m> \STOPWORDS_9005=at,au,be,br,ca,ch,de,dk,es,fi,fr,gb,hu,in,it,mx,nl,no,pl,pt,ro,ru,se,su,tr,us,zz[0;0m
+------------------------------------------------------------------------------------------------------------------------
