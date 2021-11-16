@@ -1,0 +1,7 @@
+/Repport/Write
+/Repport/*.tar.gz
+/Repport/fileskeys.csv
+/Repport/Files
+/Files
+/.vscode
+/.git
