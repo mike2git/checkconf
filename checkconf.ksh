@@ -173,11 +173,9 @@ if [[ $fileExt = "asc" ]];
 	# Compare tables
 	#
 	
-	# delete carriage return after '=' when there is data in fileFromTxtfile_asc
-	cat ${directoryOrFile} | sed -r ':a;N;$!ba;s/=\n([^\\])/=\1/g' 2>/dev/null > ${fileFromTxtfile_asc}
-	# delete carriage return after '=' when there is data in fileFromTbtoasc_asc
-	cat ${fileFromTbtoasc_asc} | sed -r ':a;N;$!ba;s/=\n([^\\])/=\1/g' 2>/dev/null > ${fileFromTbtoascTemp_asc}
-	cat ${fileFromTbtoascTemp_asc} 2>/dev/null > ${fileFromTbtoasc_asc}
+	# delete carriage return after '=' when there is data
+	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTxtfile_asc}
+	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTbtoasc_asc}
 
 	# compare fileFromTbtoasc_asc and fileFromTxtfile_asc
 	compare_stdtbl ${fileFromTbtoasc_asc} ${fileFromTxtfile_asc} > ${compareMessage} 2> ${compareError} 
@@ -413,7 +411,11 @@ then
 							cat ${file_1key_asc} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_stdtbl_1key_asc} && mv ${temp_stdtbl_1key_asc} ${stdtbl_1key_asc}
 						done
 					fi
-
+				
+				# delete carriage return after '=' when there is data
+				sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
+				sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
+				
 				# Compare tables
 				compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${PathFile}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${PathFile}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
 				fi
