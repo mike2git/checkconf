@@ -369,7 +369,7 @@ then
 															} ' > ${file_1key_asc}
 				# create stdtbl_1key_asc
 				tbtoasc -e "$line" 2>${stdtbl_1key_asc} 1> ${stdtbl_1key_asc}
-				# Traitement des clés vides
+				# Empty key processing
 				if [[ $(cat ${stdtbl_1key_asc} | awk '/^Error\s/ {print $0}') ]];
 				then 
 					flagEmpty="False"
