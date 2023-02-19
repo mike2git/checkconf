@@ -386,7 +386,7 @@ then
 							echo "${PathFile};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
 					fi
 				else
-					# traitement des faux doublons commençant par \champ= 
+					# treatment of false duplicates starting with \champ= 
 					set -A FieldsNoValue_Stdtbl $(cat ${stdtbl_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
 					set -A FieldsNoValue_File $(cat ${file_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
 					
