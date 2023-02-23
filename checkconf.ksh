@@ -172,7 +172,7 @@ if [[ $fileExt = "asc" ]];
 	#
 	# Compare tables
 	#
-	
+	cat ${directoryOrFile} > ${fileFromTxtfile_asc}
 	# delete carriage return after '=' when there is data
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTxtfile_asc}
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTbtoasc_asc}
