@@ -179,7 +179,8 @@ if [[ $fileExt = "asc" ]];
 	# Compare tables
 	#
 
-	# delete carriage return after '=' when there is data
+	# delete carriage return after '=' when there is data except comment lines
+	sed -ri '/^\!.*=$/ s/=//g' ${fileFromTxtfile_asc}
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTxtfile_asc}
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTbtoasc_asc}
 
