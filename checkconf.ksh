@@ -164,15 +164,21 @@ if [[ $fileExt = "asc" ]];
 
 
 	# Build fileFromTbtoasc.asc file
+	cat ${directoryOrFile} > ${fileFromTxtfile_asc}
 	for line in $(cat ${keys})
 	do
-			tbtoasc -e "$line" 2>/dev/null >> ${fileFromTbtoasc_asc}
+			tbtoasc -e "$line" 2> ${fileFromTbtoascTemp_asc} >> ${fileFromTbtoasc_asc}
+			# Delete empty keys from asc file
+			if [[ `cat ${fileFromTbtoascTemp_asc}` =~ ^Error ]]
+			then
+				sed -i "/${line}/,/\\\\/d" ${fileFromTxtfile_asc}
+			fi
 	done
 
 	#
 	# Compare tables
 	#
-	cat ${directoryOrFile} > ${fileFromTxtfile_asc}
+
 	# delete carriage return after '=' when there is data
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTxtfile_asc}
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${fileFromTbtoasc_asc}
