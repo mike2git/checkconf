@@ -164,6 +164,12 @@ if [[ $fileExt = "asc" ]];
 
 
 	# Build fileFromTbtoasc.asc file
+	
+	echo "$(cat ${keys} | wc -l) keys ... please wait"
+	
+	nbkeys="$(cat ${keys} | wc -l)"
+	nbkeys=$(($nbkeys - 1))
+
 	cat ${directoryOrFile} > ${fileFromTxtfile_asc}
 	for line in $(cat ${keys})
 	do
@@ -173,6 +179,15 @@ if [[ $fileExt = "asc" ]];
 			then
 				sed -i "/${line}/,/\\\\/d" ${fileFromTxtfile_asc}
 			fi
+			
+			if [[ $nbkeys = 999 || $nbkeys = 99 || $nbkeys = 9 ]]
+			then 
+			echo -e "Remaining keys to be processed :     \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\c"
+			fi
+
+			echo -e "Remaining keys to be processed : $nbkeys\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\c" 
+
+			nbkeys=$(($nbkeys - 1))
 	done
 
 	#
