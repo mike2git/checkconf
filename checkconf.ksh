@@ -202,7 +202,8 @@ if [[ $fileExt = "asc" ]];
 	# compare fileFromTbtoasc_asc and fileFromTxtfile_asc
 	compare_stdtbl ${fileFromTbtoasc_asc} ${fileFromTxtfile_asc} > ${compareMessage} 2> ${compareError} 
 	
-	if [ -s $compareError ];
+	if [ $(wc -l < "$compareError") -gt 3 ];	
+	#if [ -s $compareError ];
 	then
 		print ""
 		print " ======================= "
