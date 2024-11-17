@@ -50,7 +50,7 @@ check_utilities() {
 
 # Process to compare an ASC file
 process_asc_file() {
-  local input_file="$1"
+  typeset input_file="$1"
 
   # Validate input file
   if [[ ! -f "$input_file" ]]; then
@@ -59,11 +59,11 @@ process_asc_file() {
   fi
 
   # Prepare data paths
-  local txt_file="$DataPath/fileFromTxtfile.asc"
-  local keys_file="$DataPath/keys.txt"
-  local header_file="$DataPath/commentHeader.txt"
-  local tbtoasc_file="$DataPath/fileFromTbtoasc.asc"
-  local tbtoasc_error_file="$DataPath/fileFromTbtoascError.asc"
+  typeset txt_file="$DataPath/fileFromTxtfile.asc"
+  typeset keys_file="$DataPath/keys.txt"
+  typeset header_file="$DataPath/commentHeader.txt"
+  typeset tbtoasc_file="$DataPath/fileFromTbtoasc.asc"
+  typeset tbtoasc_error_file="$DataPath/fileFromTbtoascError.asc"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   > "$txt_file"
@@ -106,17 +106,17 @@ process_asc_file() {
 # Process to compare an FCV file
 process_fcv_file() {
   # Check if the input file exists
-  local file="$1"
+  typeset file="$1"
   if [[ ! -f "$file" ]]; then
     echo "Error: The file '$file' does not exist."
     return 1
   fi
   
   # Initialize variables
-  local txt_file="$DataPath/fileFromTxtfile.fcv"
-  local stdcomp_file="$DataPath/fileFromStdcomp.fcv"
-  local keys_file="$DataPath/keys.txt"
-  local header_file="$DataPath/commentHeader.txt"
+  typeset txt_file="$DataPath/fileFromTxtfile.fcv"
+  typeset stdcomp_file="$DataPath/fileFromStdcomp.fcv"
+  typeset keys_file="$DataPath/keys.txt"
+  typeset header_file="$DataPath/commentHeader.txt"
   
   # Clear or create the output files to avoid appending to old data
   > "$txt_file"
@@ -140,8 +140,8 @@ process_fcv_file() {
 }
 # Process a directory of ASC or FCV files
 process_directory() {
-  local dir="$1"
-  local temp_tar="${DataPathRepport}/directory.tar.gz"
+  typeset dir="$1"
+  typeset temp_tar="${DataPathRepport}/directory.tar.gz"
   
   tar -czf "$temp_tar" -C "$(dirname "$dir")" "$(basename "$dir")"
   for file in "$dir"/*.asc "$dir"/*.fcv; do
@@ -152,8 +152,8 @@ process_directory() {
 
 # Compare two files and display results
 compare_files() {
-  local file1="$1"
-  local file2="$2"
+  typeset file1="$1"
+  typeset file2="$2"
 
   compare_stdtbl "$file1" "$file2" > "$DataPath/compareMessage.txt" 2> "$DataPath/compareError.txt"
 
@@ -168,9 +168,9 @@ compare_files() {
 
 # Main script logic
 main() {
-  local directoryOrFile=""
-  local Option_Help=false
-  local Option_Write=false
+  typeset directoryOrFile=""
+  typeset Option_Help=false
+  typeset Option_Write=false
 
   # Parse arguments
   while [ $# -ge 1 ]; do
