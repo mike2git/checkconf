@@ -170,8 +170,8 @@ compare_files() {
     print "File 1: $file1"
     print "File 2: $input_file"
     print ""
-    print "Press any key to view details or Ctrl+C to exit."
-    pause
+    print "Press Ctrl+C to exit or wait to see the details."
+    read -t 5
     more ${DataPath}/compareMessage.txt
     print ""
     print "Files differ. Check $DataPath/compareMessage.txt for details."
