@@ -174,7 +174,10 @@ compare_files() {
     read -t 5
     more ${DataPath}/compareMessage.txt
     print ""
-    print "Files differ. Check $DataPath/compareMessage.txt for details."
+    print "To see the comparison again, run 'more $DataPath/compareMessage.txt'"
+    print ""
+    print "File 1: $file1"
+    print "File 2: $input_file"
     print ""
   else
     print ""
