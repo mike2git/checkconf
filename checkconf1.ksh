@@ -164,7 +164,7 @@ compare_files() {
   elif [ -s "$DataPath/compareMessage.txt" ]; then
     print ""
     print "================================================="
-    print " /!\ Files Comparison Result: Differences Found!"
+    print "\033[31m /!\ Files Comparison Result: Differences Found!\033[0m"
     print "================================================="
     print ""
     print "File 1: $file1"
