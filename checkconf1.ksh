@@ -101,6 +101,11 @@ process_asc_file() {
     fi
   done < "$keys_file"
 
+	# delete carriage return after '=' when there is data except comment lines
+	sed -ri '/^\!.*=$/ s/=//g' $txt_file
+	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' $txt_file
+	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' $tbtoasc_file
+
   # Compare the tbtoasc and txt files
   compare_files "$tbtoasc_file" "$txt_file"
 }
