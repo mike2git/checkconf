@@ -46,6 +46,8 @@ check_utilities() {
       die "Required utility '$utility' not found."
     fi
   done
+  # Use color to compare
+  export CMPSTDTBL_DIFF=colordiff
 }
 
 # Process to compare an ASC file
