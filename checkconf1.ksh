@@ -163,14 +163,15 @@ compare_files() {
     die "Error during comparison. Check $DataPath/compareError.txt for details."
   elif [ -s "$DataPath/compareMessage.txt" ]; then
     print ""
-    print " =============================== "
-    print " =======> Files differ <======== "
-    print " =============================== "
+    print "================================================="
+    print " /!\ Files Comparison Result: Differences Found!"
+    print "================================================="
     print ""
-    print $file1
-    print "is not same than"
-    print $file2
+    print "File 1: $file1"
+    print "File 2: $input_file"
     print ""
+    print "Press any key to view details or Ctrl+C to exit."
+    pause
     more ${DataPath}/compareMessage.txt
     print ""
     print "Files differ. Check $DataPath/compareMessage.txt for details."
@@ -178,9 +179,9 @@ compare_files() {
   else
     print "Files match."
     print ""
-    print " ======================== "
-    print " ====> Files match <===== "
-    print " ======================== "
+    print "=============================================="
+    print " OK! Files Comparison Result: No Differences!"
+    print "============================================="
     print ${directoryOrFile}" is same as from tbtoasc."
     print ""
     print " For more details :"
