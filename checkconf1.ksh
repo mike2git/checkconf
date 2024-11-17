@@ -1,114 +1,205 @@
 #!/usr/bin/ksh
 #
-# Script : checkconf.ksh - Compare database configuration keys with file keys (asc/fcv)
+# Script : checkconf.ksh
+# Compare database configuration keys with file keys (asc/fcv)
 # Usage  : checkconf.ksh [-help|-h] [-write|-w] <directory_or_file>
 #
 
+# Exit with an error message
 die() {
   print >&2 "$*"
   exit 1
 }
 
+# Print a timestamp with a message
 stamp() {
   date "+%d-%m-%Y %H:%M:%S ${*}"
 }
 
-USAGE="Usage: $(basename ${0}) [-help|-h] [-write|-w] <directory_or_file>"
-
-if [ $# -eq 0 ]; then
-  die "${USAGE}"
-fi
-
-directoryOrFile=""
-Option_Help=false
-Option_Write=false
-
-# Parse command-line arguments
-while [ $# -ge 1 ]; do
-  case "$1" in
-    -h|-help) Option_Help=true ;;
-    -w|-write) Option_Write=true ;;
-    *) 
-      if [ -z "$directoryOrFile" ]; then
-        directoryOrFile="$1"
-      else
-        die "${USAGE}"
-      fi
-      ;;
-  esac
-  shift
-done
-
-if $Option_Help; then
+# Display usage information
+show_usage() {
   cat <<EOF
-Usage: $(basename ${0}) [-help|-h] [-write|-w] <directory_or_file>
+Usage: $(basename $0) [-help|-h] [-write|-w] <directory_or_file>
   -help                      Display this help screen
   -write                     Rewrite keys from tbtoasc in ./Repport/Write
   <directory_or_file>        Directory or file to check
 EOF
   exit 0
-fi
+}
 
-# Initialization of paths
-BasePath="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
-DataPath="${BasePath}/Files"
-DataPathRepport="${BasePath}/Repport"
-DataPathRepportTmp="${DataPathRepport}/Files"
-DataPathRepportWrite="${DataPathRepport}/Write"
-fileskeys_csv="${DataPathRepport}/fileskeys.csv"
+# Initialize necessary paths and directories
+initialize_paths() {
+  BasePath="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
+  DataPath="${BasePath}/Files"
+  DataPathRepport="${BasePath}/Repport"
+  DataPathRepportTmp="${DataPathRepport}/Files"
+  DataPathRepportWrite="${DataPathRepport}/Write"
+  fileskeys_csv="${DataPathRepport}/fileskeys.csv"
 
-# Ensure necessary directories exist
-mkdir -p "$DataPath" "$DataPathRepport" "$DataPathRepportTmp" "$DataPathRepportWrite"
+  mkdir -p "$DataPath" "$DataPathRepport" "$DataPathRepportTmp" "$DataPathRepportWrite"
+}
 
-# Check required utilities
-for utility in gzip asctotb tbtoasc compare_stdtbl colordiff; do
-  if ! command -v "$utility" >/dev/null 2>&1; then
-    die "Required utility '$utility' not found."
-  fi
-done
-
-# Resolve absolute path
-directoryOrFile="$(readlink -f "$directoryOrFile")"
-
-# Processing file based on extension
-fileName="$(basename "$directoryOrFile")"
-fileExt="${fileName##*.}"
-filePath="$(dirname "$directoryOrFile")"
-
-# Process ASC file
-if [[ "$fileExt" = "asc" ]]; then
-  # Extract keys
-  awk '!/^[[:space:]]+.*/ {print}' "$directoryOrFile" | \
-    awk 'match($1,/^\[(.*)\]$/,output) {print output[1]}' > "$DataPath/keys.txt"
-
-  # Create a header for the rewritten file
-  awk '/^!/' "$directoryOrFile" > "$DataPath/commentHeader.txt"
-  {
-    cat "$DataPath/commentHeader.txt"
-    echo "!"
-    echo "!  $(stamp)  :  checkconf  :  rewrite of key values by tbtoasc - $fileName"
-    echo "!"
-  } > "$DataPath/fileFromTbtoasc.asc"
-
-  # Compare and validate keys
-  echo "$(wc -l < "$DataPath/keys.txt") keys ... processing"
-  while read -r key; do
-    tbtoasc -e "$key" >> "$DataPath/fileFromTbtoasc.asc" 2>>"$DataPath/fileFromTbtoascTemp.asc"
-    if grep -q '^Error' "$DataPath/fileFromTbtoascTemp.asc"; then
-      sed -i "/$key/,/\\/d" "$directoryOrFile"
+# Verify the availability of required utilities
+check_utilities() {
+  for utility in gzip asctotb tbtoasc compare_stdtbl colordiff; do
+    if ! command -v "$utility" >/dev/null 2>&1; then
+      die "Required utility '$utility' not found."
     fi
-  done < "$DataPath/keys.txt"
+  done
+}
 
-  # Compare the original and rewritten files
-  compare_stdtbl "$DataPath/fileFromTbtoasc.asc" "$directoryOrFile" > "$DataPath/compareMessage.txt" 2> "$DataPath/compareError.txt"
+# Process to compare an ASC file
+process_asc_file() {
+  local input_file="$1"
+
+  # Validate input file
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: File '$input_file' not found." >&2
+    return 1
+  fi
+
+  # Prepare data paths
+  local txt_file="$DataPath/fileFromTxtfile.asc"
+  local keys_file="$DataPath/keys.txt"
+  local header_file="$DataPath/commentHeader.txt"
+  local tbtoasc_file="$DataPath/fileFromTbtoasc.asc"
+  local tbtoasc_error_file="$DataPath/fileFromTbtoascError.asc"
+
+  # Ensure no confirmation is needed for overwrites and clear previous files
+  > "$txt_file"
+  > "$keys_file"
+  > "$header_file"
+  > "$tbtoasc_file"
+  > "$tbtoasc_error_file"
+
+  # Copy the input file to the working directory
+  cp -f "$input_file" "$txt_file"
+
+  # Extract keys from the input file
+  awk '!/^[[:space:]]+.*/ {print}' "$txt_file" | \
+    awk 'match($1,/^\[(.*)\]$/,output) {print output[1]}' > "$keys_file"
+
+  # Generate and add a comment header to the tbtoasc_file
+  # The header includes a timestamp, a description of the process, and the source file's name
+  awk '/^!/' "$txt_file" > "$header_file"
+  {
+    cat "$header_file"
+    echo "!"
+    echo "!  $(stamp)  :  checkconf  :  rewrite of key values by tbtoasc - $(basename "$txt_file")"
+    echo "!"
+  } > "$tbtoasc_file"
+
+  # Rewrite and validate keys
+  while read -r key; do
+    tbtoasc -e "$key" >> "$tbtoasc_file" 2>>"$tbtoasc_error_file"
+
+    # If an error is detected, remove the key and its associated content block
+    if grep -q '^Error' "$tbtoasc_error_file"; then
+      sed -i "/$key/,/\\\\/d" "$txt_file"
+    fi
+  done < "$keys_file"
+
+  # Compare the tbtoasc and txt files
+  compare_files "$tbtoasc_file" "$txt_file"
+}
+
+# Process to compare an FCV file
+process_fcv_file() {
+  # Check if the input file exists
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    echo "Error: The file '$file' does not exist."
+    return 1
+  fi
+  
+  # Initialize variables
+  local txt_file="$DataPath/fileFromTxtfile.fcv"
+  local stdcomp_file="$DataPath/fileFromStdcomp.fcv"
+  local keys_file="$DataPath/keys.txt"
+  local header_file="$DataPath/commentHeader.txt"
+  
+  # Clear or create the output files to avoid appending to old data
+  > "$txt_file"
+  > "$stdcomp_file"
+  > "$keys_file"
+  > "$header_file"
+
+  # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
+  stdcomp -A "$file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
+  
+  # Create a list of keys from the file name, replacing underscores with hashes
+  echo "$(basename "$file" .fcv)" | tr '_' '#' > "$keys_file"
+
+  # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
+  while read -r key; do
+    tbtoasc -e "$key" | grep -Ev "?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
+  done < "$keys_file"
+
+  # Compare the stdcomp_file with the original file to validate the changes
+  compare_files "$stdcomp_file" "$txt_file"
+}
+# Process a directory of ASC or FCV files
+process_directory() {
+  local dir="$1"
+  local temp_tar="${DataPathRepport}/directory.tar.gz"
+  
+  tar -czf "$temp_tar" -C "$(dirname "$dir")" "$(basename "$dir")"
+  for file in "$dir"/*.asc "$dir"/*.fcv; do
+    [ -f "$file" ] || continue
+    [ "${file##*.}" = "asc" ] && process_asc_file "$file" || process_fcv_file "$file"
+  done
+}
+
+# Compare two files and display results
+compare_files() {
+  local file1="$1"
+  local file2="$2"
+
+  compare_stdtbl "$file1" "$file2" > "$DataPath/compareMessage.txt" 2> "$DataPath/compareError.txt"
 
   if [ -s "$DataPath/compareError.txt" ]; then
-    die "Error during comparison. Check '$DataPath/compareError.txt' for details."
+    die "Error during comparison. Check $DataPath/compareError.txt for details."
   elif [ -s "$DataPath/compareMessage.txt" ]; then
-    print "File differs from database values. Details in $DataPath/compareMessage.txt"
+    print "Files differ. Check $DataPath/compareMessage.txt for details."
   else
-    print "File matches the database values."
+    print "Files match."
   fi
-fi
+}
 
-# Handle FCV and directories similarly...
+# Main script logic
+main() {
+  local directoryOrFile=""
+  local Option_Help=false
+  local Option_Write=false
+
+  # Parse arguments
+  while [ $# -ge 1 ]; do
+    case "$1" in
+      -h|-help) Option_Help=true ;;
+      -w|-write) Option_Write=true ;;
+      *) directoryOrFile="$1" ;;
+    esac
+    shift
+  done
+
+  $Option_Help && show_usage
+  [ -z "$directoryOrFile" ] && die "$USAGE"
+
+  initialize_paths
+  check_utilities
+
+  # Determine the type of input and process accordingly
+  if [ -f "$directoryOrFile" ]; then
+    case "${directoryOrFile##*.}" in
+      asc) process_asc_file "$directoryOrFile" ;;
+      fcv) process_fcv_file "$directoryOrFile" ;;
+      *) die "Unsupported file type: $directoryOrFile" ;;
+    esac
+  elif [ -d "$directoryOrFile" ]; then
+    process_directory "$directoryOrFile"
+  else
+    die "Invalid input: $directoryOrFile is neither a file nor a directory."
+  fi
+}
+
+main "$@"
