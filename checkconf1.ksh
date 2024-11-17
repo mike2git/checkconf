@@ -177,16 +177,13 @@ compare_files() {
     print "Files differ. Check $DataPath/compareMessage.txt for details."
     print ""
   else
-    print "Files match."
     print ""
     print "=============================================="
-    print " OK! Files Comparison Result: No Differences!"
+    print "\033[32m OK! Files Comparison Result: No Differences!\033[0m"
     print "============================================="
-    print ${directoryOrFile}" is same as from tbtoasc."
     print ""
-    print " For more details :"
-    print " ---> See "${fileFromTbtoasc_asc}
-    print " ---> See "${keys}
+    print "File 1: $file1"
+    print "File 2: $input_file"
     print ""
   fi
 }
