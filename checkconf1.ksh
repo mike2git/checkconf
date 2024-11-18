@@ -121,9 +121,9 @@ process_asc_file() {
 # Process to compare an FCV file
 process_fcv_file() {
   # Check if the input file exists
-  typeset file="$1"
-  if [[ ! -f "$file" ]]; then
-    echo "Error: The file '$file' does not exist."
+  typeset input_file="$1"
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: The file '$input_file' does not exist."
     return 1
   fi
   
@@ -139,12 +139,15 @@ process_fcv_file() {
   > "$keys_file"
   > "$header_file"
 
+  # Copy the input file to the working directory
+  cp -f "$input_file" "$txt_file"
+
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
   # stdcomp -A : Emit preprocessed data suitable for asctotb
-  stdcomp -A "$file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
+  stdcomp -A "$input_file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
   
   # Create a list of keys from the file name, replacing underscores with hashes
-  echo "$(basename "$file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
+  echo "$(basename "$input_file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
 
   # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
   while read -r key; do
