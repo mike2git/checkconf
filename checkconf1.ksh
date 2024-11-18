@@ -50,6 +50,10 @@ check_utilities() {
   export CMPSTDTBL_DIFF=colordiff
 }
 
+####################################################
+#                 ASC FILE                         #
+####################################################
+
 # Process to compare an ASC file
 process_asc_file() {
   typeset input_file="$1"
@@ -110,6 +114,10 @@ process_asc_file() {
   compare_files "$tbtoasc_file" "$txt_file"
 }
 
+####################################################
+#                 FCV FILE                         #
+####################################################
+
 # Process to compare an FCV file
 process_fcv_file() {
   # Check if the input file exists
@@ -145,6 +153,11 @@ process_fcv_file() {
   # Compare the stdcomp_file with the original file to validate the changes
   compare_files "$stdcomp_file" "$txt_file"
 }
+
+####################################################
+#              DIRECTORY ASC/FCV                   #
+####################################################
+
 # Process a directory of ASC or FCV files
 process_directory() {
   typeset dir="$1"
