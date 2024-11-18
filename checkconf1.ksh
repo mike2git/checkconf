@@ -140,10 +140,11 @@ process_fcv_file() {
   > "$header_file"
 
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
+  # stdcomp -A : Emit preprocessed data suitable for asctotb
   stdcomp -A "$file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
   
   # Create a list of keys from the file name, replacing underscores with hashes
-  echo "$(basename "$file" .fcv)" | tr '_' '#' > "$keys_file"
+  echo "$(basename "$file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
 
   # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
   while read -r key; do
