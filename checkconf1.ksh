@@ -139,9 +139,6 @@ process_fcv_file() {
   > "$keys_file"
   > "$header_file"
 
-  # Copy the input file to the working directory
-  cp -f "$input_file" "$txt_file"
-
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
   # stdcomp -A : Emit preprocessed data suitable for asctotb
   stdcomp -A "$input_file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
