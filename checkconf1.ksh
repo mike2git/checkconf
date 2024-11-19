@@ -145,7 +145,7 @@ process_fcv_file() {
   # stdcomp -A : Emit preprocessed data suitable for asctotb
   stdcomp -A "$(basename "$input_file")" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
   
-  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" file.txt | grep -E "fcv.i" | awk -F'"' '{print $2}')"
+  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" | grep -E "fcv.i" | awk -F'"' '{print $2}')"
 
   # Create a list of keys from the file name, replacing underscores with hashes
   echo "$(basename "$input_file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
