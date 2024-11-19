@@ -161,8 +161,8 @@ process_fcv_file() {
   compare_files "$stdcomp_file" "$txt_file"
 
   # Display fcv.i files
-  print ""
   print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" | grep -E "fcv.i" | awk -F'"' '{print $2}')"
+  print ""
 }
 ####################################################
 #              DIRECTORY ASC/FCV                   #
@@ -191,12 +191,12 @@ compare_files() {
     die "Error during comparison. Check $DataPath/compareError.txt for details."
   elif [ -s "$DataPath/compareMessage.txt" ]; then
     print ""
+    print "File 1: $file1"
+    print "File 2: $input_file"
+    print ""
     print "================================================="
     print "\033[31m /!\ Files Comparison Result: Differences Found!\033[0m"
     print "================================================="
-    print ""
-    print "File 1: $file1"
-    print "File 2: $input_file"
     print ""
     print "Press Ctrl+C to exit or wait to see the details."
     read -t 5
@@ -209,12 +209,13 @@ compare_files() {
     print ""
   else
     print ""
+    print "File 1: $file1"
+    print "File 2: $input_file"
+    print ""
     print "=============================================="
     print "\033[32m OK! Files Comparison Result: No Differences!\033[0m"
     print "============================================="
-    print ""
-    print "File 1: $file1"
-    print "File 2: $input_file"
+
     print ""
   fi
 }
