@@ -132,12 +132,15 @@ process_fcv_file() {
   typeset stdcomp_file="$DataPath/fileFromStdcomp.fcv"
   typeset keys_file="$DataPath/keys.txt"
   typeset header_file="$DataPath/commentHeader.txt"
+  typeset filePath="$( dirname "$(readlink -f "${input_file}")" )"
   
   # Clear or create the output files to avoid appending to old data
   > "$txt_file"
   > "$stdcomp_file"
   > "$keys_file"
   > "$header_file"
+
+  cd $filePath
 
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
   # stdcomp -A : Emit preprocessed data suitable for asctotb
