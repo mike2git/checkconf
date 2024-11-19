@@ -132,7 +132,6 @@ process_fcv_file() {
   typeset stdcomp_file="$DataPath/fileFromStdcomp.fcv"
   typeset keys_file="$DataPath/keys.txt"
   typeset header_file="$DataPath/commentHeader.txt"
-  typeset filePath="$( dirname "$(readlink -f "${input_file}")" )"
   
   # Clear or create the output files to avoid appending to old data
   > "$txt_file"
@@ -140,11 +139,11 @@ process_fcv_file() {
   > "$keys_file"
   > "$header_file"
 
-  cd $filePath
+  cd $(dirname "$input_file")
 
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
   # stdcomp -A : Emit preprocessed data suitable for asctotb
-  stdcomp -A "$input_file" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
+  stdcomp -A "$(basename "$input_file")" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
   
   # Create a list of keys from the file name, replacing underscores with hashes
   echo "$(basename "$input_file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
