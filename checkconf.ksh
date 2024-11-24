@@ -360,10 +360,23 @@ then
 			# find keys in asc file and remove [ and ] in the keys_file.txt file
 			 cat ${file} | awk '!/^[[:space:]]+.*/ {print}' | awk 'match($1,/^\[(.*)\]$/,output) {print output[1]}' 2>/dev/null > ${keys_file}
 			# find keys empty
-			cat ${file} | awk '{ if (lines > 0 && $1 ~ /^\\\\$/) { print key } } { if (match($1,/^\[(.*)\]$/,output)) { key = output[1]; lines = 1 } else {--lines}}' 2>/dev/null > ${keys_empty_file}
+			# cat ${file} | awk '{ if (lines > 0 && $1 ~ /^\\\\$/) { print key } } { if (match($1,/^\[(.*)\]$/,output)) { key = output[1]; lines = 1 } else {--lines}}' 2>/dev/null > ${keys_empty_file}
+			
+			awk '{
+				if ($1 ~ /^\[.*\]$/) { 
+					state = "key_detected";					
+					current_key = substr($1, 2, length($1) - 2);
+				} 
+				else if (state == "key_detected" && $1 ~ /^\\\\$/) { 
+					state = "empty_key_detected";
+					print current_key; 
+				} 
+				else { 
+					state = "key_not_detected"; 
+				}
+			}' "${file}" 2>/dev/null > "${keys_empty_file}"
+
 			fileWrite="${DataPathRepportWrite}/${fileName}"
-
-
 			if [ ${Option_Write} ] ;
 			then
 				# Build comment header
