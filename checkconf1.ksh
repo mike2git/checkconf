@@ -355,63 +355,61 @@ process_asc_dir() {
     print ""
   fi
 }
-#
-# case *.fcv in $dir directory
-#
-total_file_count=$(ls $dir/*.fcv 2>/dev/null | wc -l )
-if [ ${total_file_count} -ge 1 ] ;
-then
-  cd $dir	
-  for file in $(ls -a *.fcv)
-  do
-    let file_count++
-    print "File processing "$file_count"/"$total_file_count" : "$file
-
-    fileName="$(echo ${file} | awk ' { n=split($0,rep,"/"); print rep[n] }')"
-    fileExt="$(echo ${file} | awk ' { n=split($0,rep,"."); print rep[n] }')"
-
-    # StdComp -A to obtain asctotb format
-    stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
-
-    echo ${file} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
-
-    # Build temp.fcv file
-    for line in $(cat ${keys_file})
+process_fcv_dir() {
+  #
+  # case *.fcv in $dir directory
+  #
+  total_file_count=$(ls $dir/*.fcv 2>/dev/null | wc -l )
+  if [ ${total_file_count} -ge 1 ] ; then
+    cd $dir	
+    for file in $(ls -a *.fcv)
     do
-        tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
-    done
-    #
-    # Compare tables
-    #
-    if [[ $(cat ${temp_dir_tbtoasc_error_fcv} | awk '/^Error\s/ {print $0}') ]];
-    then
-      echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
-    else
-      compare_stdtbl -unchanged ${temp_dir_tbtoasc_fcv} ${temp_dir_fcv} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
-    fi
-  done
+      let file_count++
+      print "File processing "$file_count"/"$total_file_count" : "$file
 
-    # Adding statistical columns in fileskeys_csv
-    cat ${fileskeys_csv}| awk -F ";" '{ if (NR>1)
-                        {allfields[NR]=$0;
-                        field2[NR]=$2;
-                        field3[NR]=$3;
-                        doublefield3[$3]++;
-                        doublefield2[$2]++; 
-                        doublefield23[$2"-"$3]++;
-                        doublefield24[$2"-"$4]++;
-                        listdoublefield2[$3]= $2" | "listdoublefield2[$3]}
-                      else
-                        {print $0}} 
-                    END { for (numline=2 ; numline<= NR; numline++) 
-                        {print allfields[numline]";"doublefield2[field2[numline]]";",
-                        (doublefield2[field2[numline]]==doublefield24[field2[numline]"-KEY_UNCHANGED"])?"FILE_UNCHANGED;":"FILE_UPDATED;", 
-                        doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]}}' > ${temp_csv} && mv ${temp_csv} ${fileskeys_csv}
-    print ""
-    print " ---> See the array result : 		"$fileskeys_csv
-    print " ---> And the backup directory : 	"${tar_path}
-    print ""
+      fileName="$(echo ${file} | awk ' { n=split($0,rep,"/"); print rep[n] }')"
+      fileExt="$(echo ${file} | awk ' { n=split($0,rep,"."); print rep[n] }')"
+
+      # StdComp -A to obtain asctotb format
+      stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
+
+      echo ${file} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
+
+      # Build temp.fcv file
+      for line in $(cat ${keys_file})
+      do
+          tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
+      done
+      #
+      # Compare tables
+      #
+      if [[ $(cat ${temp_dir_tbtoasc_error_fcv} | awk '/^Error\s/ {print $0}') ]]; then
+        echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
+      else
+        compare_stdtbl -unchanged ${temp_dir_tbtoasc_fcv} ${temp_dir_fcv} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+      fi
+    done
   fi
+  # Adding statistical columns in fileskeys_csv
+  cat ${fileskeys_csv}| awk -F ";" '{ if (NR>1)
+                      {allfields[NR]=$0;
+                      field2[NR]=$2;
+                      field3[NR]=$3;
+                      doublefield3[$3]++;
+                      doublefield2[$2]++; 
+                      doublefield23[$2"-"$3]++;
+                      doublefield24[$2"-"$4]++;
+                      listdoublefield2[$3]= $2" | "listdoublefield2[$3]}
+                    else
+                      {print $0}} 
+                  END { for (numline=2 ; numline<= NR; numline++) 
+                      {print allfields[numline]";"doublefield2[field2[numline]]";",
+                      (doublefield2[field2[numline]]==doublefield24[field2[numline]"-KEY_UNCHANGED"])?"FILE_UNCHANGED;":"FILE_UPDATED;", 
+                      doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]}}' > ${temp_csv} && mv ${temp_csv} ${fileskeys_csv}
+  print ""
+  print " ---> See the array result : 		"$fileskeys_csv
+  print " ---> And the backup directory : 	"${tar_path}
+  print ""
 }
 
 # Compare two files and display results
