@@ -185,6 +185,7 @@ process_directory() {
   typeset stdtbl_error_log="${report_files_directory_path}/stdtbl_error_log"
   typeset keys_file_Error="${report_files_directory_path}/keys_file_Error"
   typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
+   typeset keys_empty_file="${report_files_directory_path}/keys_empty_file"
   
   #typeset tbtoasc_file="$files_directory_path/fileFromTbtoasc.asc"
   #typeset tbtoasc_error_file="$files_directory_path/fileFromTbtoascError.asc"
