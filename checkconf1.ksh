@@ -222,174 +222,174 @@ process_directory() {
       [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file"   
     done
   fi 
-   
-  process_asc_dir() { 
-    # Check if the input file exists
-    typeset input_file="$1"
-    if [[ ! -f "$input_file" ]]; then
-      echo "Error: The file '$input_file' does not exist."
-      return 1
-    fi
-    fileName=$(basename "${input_file}")
-    fileExt="${input_file##*.}"
+}  
+process_asc_dir() { 
+  # Check if the input file exists
+  typeset input_file="$1"
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: The file '$input_file' does not exist."
+    return 1
+  fi
+  fileName=$(basename "${input_file}")
+  fileExt="${input_file##*.}"
 
-    # find keys in asc file and remove [ and ] in the keys_file.txt file
-    awk '
-      !/^[[:space:]]/ &&
-      match($1, /^\[(.*)\]$/, output) {
-          print output[1]
-      }
-    ' "${input_file}" 2>/dev/null > "${keys_file}"
-    # find empty keys and write them to the keys_empty_file
-    awk '{
-      if ($1 ~ /^\[.*\]$/) { 
-        state = "key_detected";					
-        current_key = substr($1, 2, length($1) - 2);
-      } 
-      else if (state == "key_detected" && $1 ~ /^\\\\$/) { 
-        state = "empty_key_detected";
-        print current_key; 
-      } 
-      else { 
-        state = "key_not_detected"; 
-      }
-    }' "${input_file}" 2>/dev/null > "${keys_empty_file}"
+  # find keys in asc file and remove [ and ] in the keys_file.txt file
+  awk '
+    !/^[[:space:]]/ &&
+    match($1, /^\[(.*)\]$/, output) {
+        print output[1]
+    }
+  ' "${input_file}" 2>/dev/null > "${keys_file}"
+  # find empty keys and write them to the keys_empty_file
+  awk '{
+    if ($1 ~ /^\[.*\]$/) { 
+      state = "key_detected";					
+      current_key = substr($1, 2, length($1) - 2);
+    } 
+    else if (state == "key_detected" && $1 ~ /^\\\\$/) { 
+      state = "empty_key_detected";
+      print current_key; 
+    } 
+    else { 
+      state = "key_not_detected"; 
+    }
+  }' "${input_file}" 2>/dev/null > "${keys_empty_file}"
 
-    rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
+  rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
 
-    # Check if the write option is enabled (Option_Write is set)
-    if [ -n "${Option_Write}" ]; then
-      # Build comment header
-      awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
+  # Check if the write option is enabled (Option_Write is set)
+  if [ -n "${Option_Write}" ]; then
+    # Build comment header
+    awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
 
-      # Write comment header to the output file
-      {
-        cat "${header_file}"
-        echo "!"
-        echo "!  $(stamp) : checkconf : rewrite of key values by tbtoasc - ${fileName}"
-        echo "!"
-      } >> "${rewritten_file}"
+    # Write comment header to the output file
+    {
+      cat "${header_file}"
+      echo "!"
+      echo "!  $(stamp) : checkconf : rewrite of key values by tbtoasc - ${fileName}"
+      echo "!"
+    } >> "${rewritten_file}"
 
-      # Process each line in the keys_file
-      while read -r line; do
-        tbtoasc -e "$line" 2>"${keys_file_Error}" >> "${rewritten_file}"
-        
-        # Check if the keys_file_Error is not empty, indicating errors
-        if [ -s "${keys_file_Error}" ]; then
-          while read -r keyEmpty; do
-            # If the key is found in the empty keys file, append it to the rewritten file
-            if [ "${keyEmpty}" == "${line}" ]; then
-              echo "[${line}]" >> "${rewritten_file}"
-              echo "\\" >> "${rewritten_file}"
-            fi
-          done < "${keys_empty_file}"
-        fi
-      done < "${keys_file}"
-    fi
-
-    
-    # Build fileskeys.csv file
+    # Process each line in the keys_file
     while read -r line; do
-      # Create file_1key_asc by extracting the content of a specific key block from the input file
-      awk -v target_key="['${line}']" '
-        BEGIN { current_key = "" }
-        {
-          if ($1 == target_key && current_key == "") {
-            current_key = $1
-            print $1
-          } else if (/^\\\\$/ && current_key != "") {
-            current_key = ""
-            print $0
-          } else if (current_key != "") {
-            print $0
-          }
-        }
-      ' "${input_file}" > "${file_1key_asc}"
-
-      # create stdtbl_1key_asc
-      tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
-      # Empty key processing
-      if awk '/^Error\s/' "${stdtbl_error_log}" &>/dev/null; then
-        is_key_empty=false
-        while read -r key_empty; do
-          if [[ "$key_empty" == "$line" ]]; then
-            echo "${dir};${input_file};${line};KEY_UNCHANGED" >> "${fileskeys_csv}"
-            is_key_empty=true
+      tbtoasc -e "$line" 2>"${keys_file_Error}" >> "${rewritten_file}"
+      
+      # Check if the keys_file_Error is not empty, indicating errors
+      if [ -s "${keys_file_Error}" ]; then
+        while read -r keyEmpty; do
+          # If the key is found in the empty keys file, append it to the rewritten file
+          if [ "${keyEmpty}" == "${line}" ]; then
+            echo "[${line}]" >> "${rewritten_file}"
+            echo "\\" >> "${rewritten_file}"
           fi
         done < "${keys_empty_file}"
-
-        # If the key is not empty but there was an error
-        if [[ $is_key_empty == false ]]; then
-          echo "${dir};${input_file};${line};KEY_ERROR" >> "${fileskeys_csv}"
-      else
-        # treatment of false duplicates starting with \champ= 
-        set -A FieldsNoValue_Stdtbl $(cat ${stdtbl_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
-        set -A FieldsNoValue_File $(cat ${file_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
-        
-        if [[ ${FieldsNoValue_Stdtbl[0]} ]];
-        then
-          for (( i=0; i<${#FieldsNoValue_Stdtbl[*]}; i++ )) ; do
-            cat ${file_1key_asc} | awk -v field="${FieldsNoValue_Stdtbl[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file_1key_asc} && mv ${temp_file_1key_asc} ${file_1key_asc}
-          done
-        fi
-        if [[ ${FieldsNoValue_File[0]} ]];
-        then
-          for (( i=0; i<${#FieldsNoValue_File[*]}; i++ )) ; do
-            cat ${file_1key_asc} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_stdtbl_1key_asc} && mv ${temp_stdtbl_1key_asc} ${stdtbl_1key_asc}
-          done
-        fi
-      
-        # delete carriage return after '=' when there is data
-        sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
-        sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
-        
-        # Compare tables
-        compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
       fi
     done < "${keys_file}"
+  fi
 
-    if ${Option_Write} ;
-    then
-      print ""
-      print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
-      print ""
-    fi
-  }
-  #
-  # case *.fcv in $dir directory
-  #
-  total_file_count=$(ls $dir/*.fcv 2>/dev/null | wc -l )
-  if [ ${total_file_count} -ge 1 ] ;
-  then
-    cd $dir	
-    for file in $(ls -a *.fcv)
-    do
-      let file_count++
-      print "File processing "$file_count"/"$total_file_count" : "$file
+  
+  # Build fileskeys.csv file
+  while read -r line; do
+    # Create file_1key_asc by extracting the content of a specific key block from the input file
+    awk -v target_key="['${line}']" '
+      BEGIN { current_key = "" }
+      {
+        if ($1 == target_key && current_key == "") {
+          current_key = $1
+          print $1
+        } else if (/^\\\\$/ && current_key != "") {
+          current_key = ""
+          print $0
+        } else if (current_key != "") {
+          print $0
+        }
+      }
+    ' "${input_file}" > "${file_1key_asc}"
 
-      fileName="$(echo ${file} | awk ' { n=split($0,rep,"/"); print rep[n] }')"
-      fileExt="$(echo ${file} | awk ' { n=split($0,rep,"."); print rep[n] }')"
+    # create stdtbl_1key_asc
+    tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
+    # Empty key processing
+    if awk '/^Error\s/' "${stdtbl_error_log}" &>/dev/null; then
+      is_key_empty=false
+      while read -r key_empty; do
+        if [[ "$key_empty" == "$line" ]]; then
+          echo "${dir};${input_file};${line};KEY_UNCHANGED" >> "${fileskeys_csv}"
+          is_key_empty=true
+        fi
+      done < "${keys_empty_file}"
 
-      # StdComp -A to obtain asctotb format
-      stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
-
-      echo ${file} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
-
-      # Build temp.fcv file
-      for line in $(cat ${keys_file})
-      do
-          tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
-      done
-      #
-      # Compare tables
-      #
-      if [[ $(cat ${temp_dir_tbtoasc_error_fcv} | awk '/^Error\s/ {print $0}') ]];
+      # If the key is not empty but there was an error
+      if [[ $is_key_empty == false ]]; then
+        echo "${dir};${input_file};${line};KEY_ERROR" >> "${fileskeys_csv}"
+    else
+      # treatment of false duplicates starting with \champ= 
+      set -A FieldsNoValue_Stdtbl $(cat ${stdtbl_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
+      set -A FieldsNoValue_File $(cat ${file_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
+      
+      if [[ ${FieldsNoValue_Stdtbl[0]} ]];
       then
-        echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
-      else
-        compare_stdtbl -unchanged ${temp_dir_tbtoasc_fcv} ${temp_dir_fcv} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+        for (( i=0; i<${#FieldsNoValue_Stdtbl[*]}; i++ )) ; do
+          cat ${file_1key_asc} | awk -v field="${FieldsNoValue_Stdtbl[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file_1key_asc} && mv ${temp_file_1key_asc} ${file_1key_asc}
+        done
       fi
+      if [[ ${FieldsNoValue_File[0]} ]];
+      then
+        for (( i=0; i<${#FieldsNoValue_File[*]}; i++ )) ; do
+          cat ${file_1key_asc} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_stdtbl_1key_asc} && mv ${temp_stdtbl_1key_asc} ${stdtbl_1key_asc}
+        done
+      fi
+    
+      # delete carriage return after '=' when there is data
+      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
+      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
+      
+      # Compare tables
+      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+    fi
+  done < "${keys_file}"
+
+  if ${Option_Write} ;
+  then
+    print ""
+    print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
+    print ""
+  fi
+}
+#
+# case *.fcv in $dir directory
+#
+total_file_count=$(ls $dir/*.fcv 2>/dev/null | wc -l )
+if [ ${total_file_count} -ge 1 ] ;
+then
+  cd $dir	
+  for file in $(ls -a *.fcv)
+  do
+    let file_count++
+    print "File processing "$file_count"/"$total_file_count" : "$file
+
+    fileName="$(echo ${file} | awk ' { n=split($0,rep,"/"); print rep[n] }')"
+    fileExt="$(echo ${file} | awk ' { n=split($0,rep,"."); print rep[n] }')"
+
+    # StdComp -A to obtain asctotb format
+    stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
+
+    echo ${file} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
+
+    # Build temp.fcv file
+    for line in $(cat ${keys_file})
+    do
+        tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
     done
+    #
+    # Compare tables
+    #
+    if [[ $(cat ${temp_dir_tbtoasc_error_fcv} | awk '/^Error\s/ {print $0}') ]];
+    then
+      echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
+    else
+      compare_stdtbl -unchanged ${temp_dir_tbtoasc_fcv} ${temp_dir_fcv} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+    fi
+  done
 
     # Adding statistical columns in fileskeys_csv
     cat ${fileskeys_csv}| awk -F ";" '{ if (NR>1)
