@@ -181,6 +181,8 @@ process_directory() {
   typeset tar_path="${report_directory_path}/directory.tar.gz"
   typeset keys_file="${report_files_directory_path}/keys.txt"
   typeset header_file="${report_files_directory_path}/commentHeader.txt"
+  typeset stdtbl_1key_asc="${report_files_directory_path}/stdtbl_1key.asc"
+  typeset stdtbl_error_log="${report_files_directory_path}/stdtbl_error_log"
   #typeset tbtoasc_file="$files_directory_path/fileFromTbtoasc.asc"
   #typeset tbtoasc_error_file="$files_directory_path/fileFromTbtoascError.asc"
 
@@ -287,31 +289,38 @@ process_directory() {
 
     
     # Build fileskeys.csv file
-    for line in $(cat ${keys_file})
-    do
-      # create file_1key_asc
-      cat ${input_file} | awk 'BEGIN {currentkey =""} {if($1 == "['${line}']" && currentkey ==""){currentkey=$1; print $1} 
-                              else if (/^\\\\$/ && currentkey != ""){currentkey =""; print $0} 
-                                else if (currentkey !="") {print $0}
-                            } ' > ${file_1key_asc}
+    while read -r line; do
+      # Create file_1key_asc by extracting the content of a specific key block from the input file
+      awk -v target_key="['${line}']" '
+        BEGIN { current_key = "" }
+        {
+          if ($1 == target_key && current_key == "") {
+            current_key = $1
+            print $1
+          } else if (/^\\\\$/ && current_key != "") {
+            current_key = ""
+            print $0
+          } else if (current_key != "") {
+            print $0
+          }
+        }
+      ' "${input_file}" > "${file_1key_asc}"
+
       # create stdtbl_1key_asc
-      tbtoasc -e "$line" 2>${stdtbl_1key_asc} 1> ${stdtbl_1key_asc}
+      tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
       # Empty key processing
-      if [[ $(cat ${stdtbl_1key_asc} | awk '/^Error\s/ {print $0}') ]];
-      then 
-        flagEmpty="False"
-        while read keyEmpty
-        do
-          if [ $keyEmpty == $line ];
-          then
-            echo "${dir};${input_file};${line};KEY_UNCHANGED" >> ${fileskeys_csv}
-            flagEmpty="True"
+      if awk '/^Error\s/' "${stdtbl_error_log}" &>/dev/null; then
+        is_key_empty=false
+        while read -r key_empty; do
+          if [[ "$key_empty" == "$line" ]]; then
+            echo "${dir};${input_file};${line};KEY_UNCHANGED" >> "${fileskeys_csv}"
+            is_key_empty=true
           fi
-        done < $keys_empty_file
-        if [ ! $flagEmpty ];
-        then
-            echo "${dir};${input_file};${line};KEY_ERROR" >> ${fileskeys_csv}
-        fi
+        done < "${keys_empty_file}"
+
+        # If the key is not empty but there was an error
+        if [[ $is_key_empty == false ]]; then
+          echo "${dir};${input_file};${line};KEY_ERROR" >> "${fileskeys_csv}"
       else
         # treatment of false duplicates starting with \champ= 
         set -A FieldsNoValue_Stdtbl $(cat ${stdtbl_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
@@ -330,14 +339,15 @@ process_directory() {
           done
         fi
       
-      # delete carriage return after '=' when there is data
-      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
-      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
-      
-      # Compare tables
-      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+        # delete carriage return after '=' when there is data
+        sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
+        sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
+        
+        # Compare tables
+        compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
       fi
-    done
+    done < "${keys_file}"
+
     if ${Option_Write} ;
     then
       print ""
