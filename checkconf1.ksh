@@ -452,6 +452,23 @@ compare_files() {
   fi
 }
 
+# Function to convert a relative path to an absolute path
+get_absolute_path() {
+  relative_path="$1"
+
+  # Get the absolute directory
+  if [[ "$relative_path" != /* ]]; then
+    absolute_path="$(pwd)/$relative_path"
+  else
+    absolute_path="$relative_path"
+  fi
+
+  # Clean up the absolute path
+  absolute_path=$(echo "$absolute_path" | sed -e 's|/\./|/|g' -e 's|//|/|g' -e 's|[^/][^/]*/\.\./||g')
+
+  echo "$absolute_path"
+}
+
 # Main script logic
 main() {
   typeset directoryOrFile=""
@@ -463,7 +480,7 @@ main() {
     case "$1" in
       -h|-help) Option_Help=true ;;
       -w|-write) Option_Write=true ;;
-      *) directoryOrFile="$1" ;;
+      *) directoryOrFile="$(get_absolute_path $1)" ;;
     esac
     shift
   done
