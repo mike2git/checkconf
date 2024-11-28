@@ -458,13 +458,11 @@ get_absolute_path() {
 
   # Get the absolute directory
   if [[ "$relative_path" != /* ]]; then
-    absolute_path="$(pwd)/$relative_path"
-  else
-    absolute_path="$relative_path"
+    relative_path="$(pwd)/$relative_path"
   fi
 
-  # Clean up the absolute path
-  absolute_path=$(echo "$absolute_path" | sed -e 's|/\./|/|g' -e 's|//|/|g' -e 's|[^/][^/]*/\.\./||g')
+  # Use a subshell with cd to resolve the absolute path fully
+  absolute_path=$(cd "$(dirname "$relative_path")" && pwd)/$(basename "$relative_path")
 
   echo "$absolute_path"
 }
