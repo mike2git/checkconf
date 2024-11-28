@@ -480,7 +480,7 @@ main() {
     case "$1" in
       -h|-help) Option_Help=true ;;
       -w|-write) Option_Write=true ;;
-      *) directoryOrFile="$(get_absolute_path $1)" ;;
+      *) directoryOrFile=$(get_absolute_path $1) ;;
     esac
     shift
   done
