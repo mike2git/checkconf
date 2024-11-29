@@ -226,6 +226,8 @@ process_directory() {
       [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file"   
     done
   fi 
+  # add statistical
+  add_statistical "$fileskeys_csv"
 }  
 process_asc_dir() { 
   # Check if the input file exists
@@ -390,28 +392,47 @@ process_fcv_dir() {
       fi
     done
   fi
-  # Adding statistical columns in fileskeys_csv
-  cat ${fileskeys_csv}| awk -F ";" '{ if (NR>1)
-                      {allfields[NR]=$0;
-                      field2[NR]=$2;
-                      field3[NR]=$3;
-                      doublefield3[$3]++;
-                      doublefield2[$2]++; 
-                      doublefield23[$2"-"$3]++;
-                      doublefield24[$2"-"$4]++;
-                      listdoublefield2[$3]= $2" | "listdoublefield2[$3]}
-                    else
-                      {print $0}} 
-                  END { for (numline=2 ; numline<= NR; numline++) 
-                      {print allfields[numline]";"doublefield2[field2[numline]]";",
-                      (doublefield2[field2[numline]]==doublefield24[field2[numline]"-KEY_UNCHANGED"])?"FILE_UNCHANGED;":"FILE_UPDATED;", 
-                      doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]}}' > ${temp_csv} && mv ${temp_csv} ${fileskeys_csv}
-  print ""
-  print " ---> See the array result : 		"$fileskeys_csv
-  print " ---> And the backup directory : 	"${tar_path}
-  print ""
 }
 
+add_statistical() {
+  # Define a temporary output file
+  temp_output_file="${fileskeys_csv}.tmp"
+  
+  # Add statistical columns to fileskeys_csv
+  awk -F ";" '
+    NR == 1 {
+      print $0; next
+    }
+    {
+      allfields[NR] = $0
+      field2[NR] = $2
+      field3[NR] = $3
+
+      doublefield2[$2]++
+      doublefield3[$3]++
+      doublefield23[$2"-"$3]++
+      doublefield24[$2"-"$4]++
+      
+      if (!listdoublefield2[$3]) {
+        listdoublefield2[$3] = $2
+      } else {
+        listdoublefield2[$3] = $2" | "listdoublefield2[$3]
+      }
+    }
+    END {
+      for (numline = 2; numline <= NR; numline++) {
+        print allfields[numline] ";" doublefield2[field2[numline]] ";",
+          (doublefield2[field2[numline]] == doublefield24[field2[numline]"-KEY_UNCHANGED"] ? "FILE_UNCHANGED;" : "FILE_UPDATED;"),
+          doublefield3[field3[numline]] ";" listdoublefield2[field3[numline]]
+      }
+    }
+  ' "$fileskeys_csv" > "$temp_output_file" && mv "$temp_output_file" "$fileskeys_csv"
+
+  print ""
+  print " ---> See the array result:       $fileskeys_csv"
+  print " ---> And the backup directory:   $tar_path"
+  print ""
+}
 # Compare two files and display results
 compare_files() {
   typeset file1="$1"
