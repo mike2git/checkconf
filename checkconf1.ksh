@@ -521,6 +521,7 @@ main() {
       *) die "Unsupported file type: $directoryOrFile" ;;
     esac
   elif [ -d "$directoryOrFile" ]; then
+    echo "process_directory start"
     process_directory "$directoryOrFile"
   else
     die "Invalid input: $directoryOrFile is neither a file nor a directory."
