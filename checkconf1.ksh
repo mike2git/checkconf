@@ -367,9 +367,14 @@ process_fcv_dir() {
   #
   # Initialize necessary variables
   #
-  temp_dir_tbtoasc_error_fcv=""  # Temporary file for storing errors during tbtoasc conversion
-  temp_dir_tbtoasc_fcv=""        # Temporary file for storing tbtoasc conversion result
-
+  temp_dir_tbtoasc_error_fcv="${report_files_directory_path}/temp_dir_tbtoasc_error_fcv"  # Temporary file for storing errors during tbtoasc conversion
+  temp_dir_tbtoasc_fcv="${report_files_directory_path}/temp_dir_tbtoasc_fcv"        # Temporary file for storing tbtoasc conversion result
+  echo "temp_dir_tbtoasc_error_fcv : $temp_dir_tbtoasc_error_fcv"
+  echo "temp_dir_tbtoasc_fcv : $temp_dir_tbtoasc_fcv"
+  echo "file : $file"
+  echo "keys_file : $keys_file"
+  echo "dir : $dir"
+  echo "line : $line"
 
   # StdComp -A to obtain asctotb format
   stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
