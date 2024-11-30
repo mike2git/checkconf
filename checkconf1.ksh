@@ -223,7 +223,8 @@ process_directory() {
       [ -f "$file" ] || continue
       let file_count++
       print "File processing "$file_count"/"$total_file_count" : "$file
-      [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file"   
+      [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file" 
+      echo "boucle for"  
     done
   fi 
   # add statistical
