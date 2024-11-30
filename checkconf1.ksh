@@ -209,9 +209,10 @@ process_directory() {
   echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${fileskeys_csv}
       
   #
-  # case *.asc in $dir directory
+  # case *.asc or *.fcv in $dir directory
   #
-  total_file_count=$(find "$dir" -maxdepth 1 -type f -name '*.asc' 2>/dev/null | wc -l)
+  total_file_count=$(find "$dir" -maxdepth 1 -type f \( -name '*.asc' -o -name '*.fcv' \) 2>/dev/null | wc -l | awk '{print $1}')
+
   if [ ${total_file_count} -ge 1 ] ; then 
     if [ ! -e "${rewritten_asc_fcv_dir_path}" ]; then
         mkdir -p "${rewritten_asc_fcv_dir_path}"
@@ -521,7 +522,6 @@ main() {
       *) die "Unsupported file type: $directoryOrFile" ;;
     esac
   elif [ -d "$directoryOrFile" ]; then
-    echo "process_directory start"
     process_directory "$directoryOrFile"
   else
     die "Invalid input: $directoryOrFile is neither a file nor a directory."
