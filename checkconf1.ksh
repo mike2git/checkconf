@@ -307,7 +307,7 @@ process_asc_dir() {
     if [[ $(cat ${stdtbl_error_log} | awk '/^Error\s/ {print $0}') ]]; then
       echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
     else
-      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
     fi
   done < "${keys_file}"
   if ${Option_Write} ; then
@@ -374,7 +374,9 @@ add_statistical() {
     }
     END {
       for (numline = 2; numline <= NR; numline++) {
-        print allfields[numline]";"doublefield2[field2[numline]]";",(doublefield2[field2[numline]]==doublefield24[field2[numline]"-KEY_UNCHANGED"])?"FILE_UNCHANGED;":"FILE_UPDATED;",doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
+        print allfields[numline]";"doublefield2[field2[numline]]";",
+        (doublefield2[field2[numline]]==doublefield24[field2[numline]"-KEY_UNCHANGED"])?"FILE_UNCHANGED;":"FILE_UPDATED;", 
+        doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
   ' "$fileskeys_csv" > "$temp_output_file" && mv "$temp_output_file" "$fileskeys_csv"
