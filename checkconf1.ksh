@@ -311,35 +311,26 @@ process_asc_dir() {
         }
       }
     ' "${input_file}" > "${file_1key_asc}"
-    # create stdtbl_1key_asc
-    tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
-    # Empty key processing
-    if awk '/^Error\s/' "${stdtbl_error_log}" &>/dev/null; then
-        echo "${dir};${input_file};${line};KEY_ERROR" >> "${fileskeys_csv}"
-    else
-      # # treatment of false duplicates starting with \champ= 
-      # set -A FieldsNoValue_Stdtbl $(awk 'match($1, /(^\\\S+=)$/, output) {print "\\"output[1]}' "$stdtbl_1key_asc")
-      # set -A FieldsNoValue_File $(awk 'match($1, /(^\\\S+=)$/, output) {print "\\"output[1]}' "$file_1key_asc")
-      
-      # if [[ ${FieldsNoValue_Stdtbl[0]} ]]; then
-      #   for (( i=0; i<${#FieldsNoValue_Stdtbl[*]}; i++ )) ; do
-      #     cat ${file_1key_asc} | awk -v field="${FieldsNoValue_Stdtbl[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file_1key_asc} && mv ${temp_file_1key_asc} ${file_1key_asc}
-      #   done
-      # fi
-      # if [[ ${FieldsNoValue_File[0]} ]]; then
-      #   for (( i=0; i<${#FieldsNoValue_File[*]}; i++ )) ; do
-      #     cat ${file_1key_asc} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_stdtbl_1key_asc} && mv ${temp_stdtbl_1key_asc} ${stdtbl_1key_asc}
-      #   done
-      # fi
-    
-      # delete carriage return after '=' when there is data
-      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
-      sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
-      
-      # Compare tables
-      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${input_file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
-    fi
+  
+    # Build stdtbl_1key_asc file
+  while read -r line; do
+      tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
+      #tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
   done < "${keys_file}"
+ 
+  # delete carriage return after '=' when there is data
+  sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
+  sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
+ 
+  #
+  # Compare tables
+  #
+
+  if [[ $(cat ${stdtbl_error_log} | awk '/^Error\s/ {print $0}') ]]; then
+    echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
+  else
+    compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+  fi
 
   if ${Option_Write} ; then
     print ""
