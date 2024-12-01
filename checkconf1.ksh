@@ -297,6 +297,7 @@ process_asc_dir() {
   # Build fileskeys.csv file
   while read -r line; do
     # Create file_1key_asc by extracting the content of a specific key block from the input file
+    echo "line : $line"
     awk -v target_key="['${line}']" '
       BEGIN { current_key = "" }
       {
