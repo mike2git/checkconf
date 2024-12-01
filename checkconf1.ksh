@@ -175,11 +175,11 @@ process_directory() {
 
   cd $dir
   
-  # Prepare data paths
+  # Prepare data path
   typeset tar_path="${report_directory_path}/directory.tar.gz"
   typeset keys_file="${report_files_directory_path}/keys.txt"
   typeset fileskeys_csv="${report_directory_path}/fileskeys.csv"
-  
+
   # Ensure no confirmation is needed for overwrites and clear previous files
   echo > ${keys_file}
 
@@ -215,15 +215,20 @@ process_directory() {
       let file_count++
       print "File processing "$file_count"/"$total_file_count" : "$file
       [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file" 
-      echo "boucle for"  
     done
   fi 
   # add statistical
   add_statistical "$fileskeys_csv"
 }  
 process_asc_dir() { 
-  # Check if the input file exists
   typeset input_file="$1"
+  # Validate input file
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: File '$input_file' not found." >&2
+    return 1
+  fi
+
+  # Prepare data path
   typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
   typeset keys_empty_file="${report_files_directory_path}/keys_empty_file"
   typeset keys_file_Error="${report_files_directory_path}/keys_file_Error"
@@ -231,10 +236,6 @@ process_asc_dir() {
   typeset stdtbl_1key_asc="${report_files_directory_path}/stdtbl_1key.asc"
   typeset header_file="${report_files_directory_path}/commentHeader.txt"
 
-  if [[ ! -f "$input_file" ]]; then
-    echo "Error: The file '$input_file' does not exist."
-    return 1
-  fi
   fileName=$(basename "${input_file}")
   fileExt="${input_file##*.}"
 
@@ -363,19 +364,10 @@ process_fcv_dir() {
   # case *.fcv in $dir directory
   #
 
-  #
-  # Initialize necessary variables
-  #
+  # Prepare data path
   typeset temp_dir_tbtoasc_error_fcv="${report_files_directory_path}/temp_dir_tbtoasc_error_fcv"  # Temporary file for storing errors during tbtoasc conversion
   typeset temp_dir_tbtoasc_fcv="${report_files_directory_path}/temp_dir_tbtoasc_fcv"        # Temporary file for storing tbtoasc conversion result
   typeset temp_dir_fcv="${report_files_directory_path}/temp_dir_fcv"
-
-  echo "temp_dir_tbtoasc_error_fcv : $temp_dir_tbtoasc_error_fcv"
-  echo "temp_dir_tbtoasc_fcv : $temp_dir_tbtoasc_fcv"
-  echo "file : $file"
-  echo "keys_file : $keys_file"
-  echo "dir : $dir"
-  echo "line : $line"
 
   # StdComp -A to obtain asctotb format
   stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
