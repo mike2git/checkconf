@@ -34,7 +34,6 @@ initialize_paths() {
   report_directory_path="${base_path}/repport"
   report_files_directory_path="${report_directory_path}/files"
   rewritten_asc_fcv_dir_path="${report_directory_path}/rewritten_asc_fcv_dir"
-  fileskeys_csv="${report_directory_path}/fileskeys.csv"
 
   mkdir -p "$files_directory_path" "$report_directory_path" "$report_files_directory_path" "$rewritten_asc_fcv_dir_path"
 }
@@ -177,19 +176,10 @@ process_directory() {
   cd $dir
   
   # Prepare data paths
-  #typeset txt_file="$files_directory_path/fileFromTxtfile.asc"
   typeset tar_path="${report_directory_path}/directory.tar.gz"
   typeset keys_file="${report_files_directory_path}/keys.txt"
-  typeset header_file="${report_files_directory_path}/commentHeader.txt"
-  typeset stdtbl_1key_asc="${report_files_directory_path}/stdtbl_1key.asc"
-  typeset stdtbl_error_log="${report_files_directory_path}/stdtbl_error_log"
-  typeset keys_file_Error="${report_files_directory_path}/keys_file_Error"
-  typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
-  typeset keys_empty_file="${report_files_directory_path}/keys_empty_file"
+  typeset fileskeys_csv="${report_directory_path}/fileskeys.csv"
   
-  #typeset tbtoasc_file="$files_directory_path/fileFromTbtoasc.asc"
-  #typeset tbtoasc_error_file="$files_directory_path/fileFromTbtoascError.asc"
-
   # Ensure no confirmation is needed for overwrites and clear previous files
   echo > ${keys_file}
 
@@ -234,6 +224,13 @@ process_directory() {
 process_asc_dir() { 
   # Check if the input file exists
   typeset input_file="$1"
+  typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
+  typeset keys_empty_file="${report_files_directory_path}/keys_empty_file"
+  typeset keys_file_Error="${report_files_directory_path}/keys_file_Error"
+  typeset stdtbl_error_log="${report_files_directory_path}/stdtbl_error_log"
+  typeset stdtbl_1key_asc="${report_files_directory_path}/stdtbl_1key.asc"
+  typeset header_file="${report_files_directory_path}/commentHeader.txt"
+
   if [[ ! -f "$input_file" ]]; then
     echo "Error: The file '$input_file' does not exist."
     return 1
@@ -369,8 +366,10 @@ process_fcv_dir() {
   #
   # Initialize necessary variables
   #
-  temp_dir_tbtoasc_error_fcv="${report_files_directory_path}/temp_dir_tbtoasc_error_fcv"  # Temporary file for storing errors during tbtoasc conversion
-  temp_dir_tbtoasc_fcv="${report_files_directory_path}/temp_dir_tbtoasc_fcv"        # Temporary file for storing tbtoasc conversion result
+  typeset temp_dir_tbtoasc_error_fcv="${report_files_directory_path}/temp_dir_tbtoasc_error_fcv"  # Temporary file for storing errors during tbtoasc conversion
+  typeset temp_dir_tbtoasc_fcv="${report_files_directory_path}/temp_dir_tbtoasc_fcv"        # Temporary file for storing tbtoasc conversion result
+  typeset temp_dir_fcv="${report_files_directory_path}/temp_dir_fcv"
+
   echo "temp_dir_tbtoasc_error_fcv : $temp_dir_tbtoasc_error_fcv"
   echo "temp_dir_tbtoasc_fcv : $temp_dir_tbtoasc_fcv"
   echo "file : $file"
