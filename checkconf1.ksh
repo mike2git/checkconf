@@ -311,7 +311,8 @@ process_asc_dir() {
         }
       }
     ' "${input_file}" > "${file_1key_asc}"
-
+    echo "cat ${file_1key_asc}"
+    cat "${file_1key_asc}"
     # create stdtbl_1key_asc
     tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
     # Empty key processing
