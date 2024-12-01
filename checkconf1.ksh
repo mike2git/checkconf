@@ -315,18 +315,7 @@ process_asc_dir() {
     tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
     # Empty key processing
     if awk '/^Error\s/' "${stdtbl_error_log}" &>/dev/null; then
-      is_key_empty=false
-      while read -r key_empty; do
-        if [[ "$key_empty" == "$line" ]]; then
-          echo "${dir};${input_file};${line};KEY_UNCHANGED" >> "${fileskeys_csv}"
-          is_key_empty=true
-        fi
-      done < "${keys_empty_file}"
-
-      # If the key is not empty but there was an error
-      if [[ $is_key_empty == false ]]; then
         echo "${dir};${input_file};${line};KEY_ERROR" >> "${fileskeys_csv}"
-      fi
     else
       # # treatment of false duplicates starting with \champ= 
       # set -A FieldsNoValue_Stdtbl $(awk 'match($1, /(^\\\S+=)$/, output) {print "\\"output[1]}' "$stdtbl_1key_asc")
