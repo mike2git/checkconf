@@ -297,7 +297,6 @@ process_asc_dir() {
   # Build fileskeys.csv file
   while read -r line; do
     # Create file_1key_asc by extracting the content of a specific key block from the input file
-    echo "line : $line"
     awk -v target_key="[${line}]" '
       BEGIN { current_key = "" }
       {
@@ -312,8 +311,6 @@ process_asc_dir() {
         }
       }
     ' "${input_file}" > "${file_1key_asc}"
-    echo "cat ${file_1key_asc}"
-    cat "${file_1key_asc}"
     # create stdtbl_1key_asc
     tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
     # Empty key processing
