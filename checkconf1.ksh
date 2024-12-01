@@ -375,8 +375,8 @@ add_statistical() {
     END {
       for (numline = 2; numline <= NR; numline++) {
         print allfields[numline]";"doublefield2[field2[numline]]";",
-          (doublefield2[field2[numline]] == doublefield24[field2[numline]"-KEY_UNCHANGED"]?"FILE_UNCHANGED;":"FILE_UPDATED;"),
-          doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
+        (doublefield2[field2[numline]] == doublefield24[field2[numline]"-KEY_UNCHANGED"]?"FILE_UNCHANGED;":"FILE_UPDATED;"),
+        doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
   ' "$fileskeys_csv" > "$temp_output_file" && mv "$temp_output_file" "$fileskeys_csv"
