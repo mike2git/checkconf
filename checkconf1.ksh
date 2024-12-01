@@ -313,7 +313,6 @@ process_asc_dir() {
     ' "${input_file}" > "${file_1key_asc}"
   
     # Build stdtbl_1key_asc file
-  while read -r line; do
       tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
       #tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
   done < "${keys_file}"
