@@ -337,8 +337,8 @@ process_fcv_dir() {
   stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${file_fcv_dir}
 
   # Build keys_file.txt file 
-  # find keys in the filename of fcv file (begin by FCV and replace _ by #)
-  echo ${filename} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
+  # find keys in the fileName of fcv file (begin by FCV and replace _ by #)
+  echo ${fileName} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
 
   # Build stdcomp_fcv_dir file
   for line in $(cat ${keys_file}) ; do
