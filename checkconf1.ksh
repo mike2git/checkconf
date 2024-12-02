@@ -349,7 +349,7 @@ process_fcv_dir() {
 
   # Build stdcomp_fcv_dir file
   #for line in $(cat ${keys_file}) ; do
-  typeset key = $(cat ${keys_file})
+  typeset key="$(cat ${keys_file})"
   tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
   #done
   
