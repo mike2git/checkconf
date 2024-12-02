@@ -31,12 +31,16 @@ EOF
 # Initialize necessary paths and directories
 initialize_paths() {
   base_path="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
-  files_directory_path="${base_path}/files"
-  report_directory_path="${base_path}/repport"
-  report_files_directory_path="${report_directory_path}/files"
-  rewritten_asc_fcv_dir_path="${report_directory_path}/rewritten_asc_fcv_dir"
+  fcv_file_path="${base_path}/fcv_file"
+  asc_file_path="${base_path}/asc_file"
+  compare_path="${base_path}/compare"
+  repport_directory_path="${base_path}/repport"
+  fcv_dir_path="${base_path}/fcv_dir"
+  asc-dir-path="${base_path}/asc_dir"
+  rewritten_asc_fcv_dir_path="${base_path}/rewritten_asc_fcv_dir"
+  backup_path="${base_path}/backup"
 
-  mkdir -p "$files_directory_path" "$report_directory_path" "$report_files_directory_path" "$rewritten_asc_fcv_dir_path"
+  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$repport_directory_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
 }
 
 # Verify the availability of required utilities
@@ -65,11 +69,11 @@ process_asc_file() {
   fi
 
   # Prepare data paths
-  typeset txt_file="$files_directory_path/fileFromTxtfile.asc"
-  typeset keys_file="$files_directory_path/keys.txt"
-  typeset header_file="$files_directory_path/commentHeader.txt"
-  typeset tbtoasc_file="$files_directory_path/fileFromTbtoasc.asc"
-  typeset tbtoasc_error_file="$files_directory_path/fileFromTbtoascError.asc"
+  typeset txt_file="$asc_file_path/fileFromTxtfile.asc"
+  typeset keys_file="$asc_file_path/keys.txt"
+  typeset header_file="$asc_file_path/commentHeader.txt"
+  typeset tbtoasc_file="$asc_file_path/fileFromTbtoasc.asc"
+  typeset tbtoasc_error_file="$asc_file_path/fileFromTbtoascError.asc"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   > "$txt_file"
@@ -128,9 +132,9 @@ process_fcv_file() {
   fi
   
   # Initialize variables
-  typeset txt_file="$files_directory_path/fileFromTxtfile.fcv"
-  typeset stdcomp_file="$files_directory_path/fileFromStdcomp.fcv"
-  typeset keys_file="$files_directory_path/keys.txt"
+  typeset txt_file="$fcv_file_path/fileFromTxtfile.fcv"
+  typeset stdcomp_file="$fcv_file_path/fileFromStdcomp.fcv"
+  typeset keys_file="$fcv_file_path/keys.txt"
   
   # Clear or create the output files to avoid appending to old data
   > "$txt_file"
@@ -178,9 +182,9 @@ process_directory() {
   cd $dir
   
   # Prepare data path
-  typeset tar_path="${report_directory_path}/directory.tar.gz"
-  typeset keys_file="${report_files_directory_path}/keys.txt"
-  typeset report_csv="${report_directory_path}/report.csv"
+  typeset tar_path="${backup_path}/directory.tar.gz"
+  typeset keys_file="${asc_dir_path}/keys.txt"
+  typeset repport_csv="${repport_path}/repport.csv"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   echo > ${keys_file}
@@ -196,7 +200,7 @@ process_directory() {
   fi 
 
   #Initialization of the result file
-  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
+  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${repport_csv}
       
   #
   # case *.asc or *.fcv in $dir directory
@@ -218,7 +222,7 @@ process_directory() {
     done
   fi 
   # add statistical
-  add_statistical "$report_csv"
+  add_statistical "$repport_csv"
 }
 
 ####################################################
@@ -234,11 +238,11 @@ process_asc_dir() {
   fi
 
   # Prepare data path
-  typeset tbtoasc_error_log_rewritten="${report_files_directory_path}/tbtoasc_error_log_rewritten"
-  typeset tbtoasc_error_log="${report_files_directory_path}/tbtoasc_error_log"
-  typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
-  typeset tbtoasc_1key_asc="${report_files_directory_path}/tbtoasc_1key_asc"
-  typeset header_file="${report_files_directory_path}/commentHeader.txt"
+  typeset tbtoasc_error_log_rewritten="${asc_dir_path}/tbtoasc_error_log_rewritten"
+  typeset tbtoasc_error_log="${asc_dir_path}/tbtoasc_error_log"
+  typeset file_1key_asc="${asc_dir_path}/file_1key_asc"
+  typeset tbtoasc_1key_asc="${asc_dir_path}/tbtoasc_1key_asc"
+  typeset header_file="${asc_dir_path}/commentHeader.txt"
 
     # Clear or create the output files to avoid appending to old data
   > "$tbtoasc_error_log_rewritten"
@@ -286,9 +290,9 @@ process_asc_dir() {
   
     # Compare tbtoasc_1key_asc vs file_1key_asc
     if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-      echo "${dir};${file};${line};KEY_ERROR" >> ${report_csv}
+      echo "${dir};${file};${line};KEY_ERROR" >> ${repport_csv}
     else
-      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${report_csv}
+      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${repport_csv}
     fi
   done < "${keys_file}"
   
@@ -336,9 +340,9 @@ process_fcv_dir() {
   fi
 
   # Prepare data path
-  typeset stdcomp_error_log="${report_files_directory_path}/stdcomp_error_log"  # Temporary file for storing errors during tbtoasc conversion
-  typeset stdcomp_fcv_dir="${report_files_directory_path}/stdcomp_fcv_dir.asc"        # Temporary file for storing tbtoasc conversion result
-  typeset file_fcv_dir="${report_files_directory_path}/file_fcv_dir.asc"
+  typeset stdcomp_error_log="${fcv_dir_path}/stdcomp_error_log"  # Temporary file for storing errors during tbtoasc conversion
+  typeset stdcomp_fcv_dir="${fcv_dir_path}/stdcomp_fcv_dir.asc"        # Temporary file for storing tbtoasc conversion result
+  typeset file_fcv_dir="${fcv_dir_path}/file_fcv_dir.asc"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   > "$stdcomp_error_log"
@@ -362,9 +366,9 @@ process_fcv_dir() {
 
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-    echo "${dir};${file};${key};KEY_ERROR" >> ${report_csv}
+    echo "${dir};${file};${key};KEY_ERROR" >> ${repport_csv}
   else
-    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UPDATED"}' >> ${report_csv}
+    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UPDATED"}' >> ${repport_csv}
   fi
 
 }
@@ -375,9 +379,9 @@ process_fcv_dir() {
 
 add_statistical() {
   # Define a temporary output file
-  report_csv_tmp="${report_csv}.tmp"
+  repport_csv_tmp="${repport_csv}.tmp"
   
-  # Add statistical columns to report_csv
+  # Add statistical columns to repport_csv
   awk -F ";" '
     NR == 1 {
       print $0; next
@@ -405,10 +409,10 @@ add_statistical() {
         doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
-  ' "$report_csv" > "$report_csv_tmp" && mv "$report_csv_tmp" "$report_csv"
+  ' "$repport_csv" > "$repport_csv_tmp" && mv "$repport_csv_tmp" "$repport_csv"
 
   print ""
-  print " ---> See the array result:       $report_csv"
+  print " ---> See the array result:       $repport_csv"
   print " ---> And the backup directory:   $tar_path"
   print ""
 }
@@ -422,11 +426,11 @@ compare_files() {
   typeset file1="$1"
   typeset file2="$2"
 
-  compare_stdtbl "$file1" "$file2" > "$files_directory_path/compareMessage.txt" 2> "$files_directory_path/compareError.txt"
+  compare_stdtbl "$file1" "$file2" > "$compare_path/compareMessage.txt" 2> "$compare_path/compareError.txt"
 
-  if [ -s "$files_directory_path/compareError.txt" ]; then
-    die "Error during comparison. Check $files_directory_path/compareError.txt for details."
-  elif [ -s "$files_directory_path/compareMessage.txt" ]; then
+  if [ -s "$compare_path/compareError.txt" ]; then
+    die "Error during comparison. Check $compare_path/compareError.txt for details."
+  elif [ -s "$compare_path/compareMessage.txt" ]; then
     print ""
     print "File 1: $file1"
     print "File 2: $input_file"
@@ -437,9 +441,9 @@ compare_files() {
     print ""
     print "Press Ctrl+C to exit or wait to see the details."
     read -t 5
-    more ${files_directory_path}/compareMessage.txt
+    more ${compare_path}/compareMessage.txt
     print ""
-    print "To see the comparison again, run 'more $files_directory_path/compareMessage.txt'"
+    print "To see the comparison again, run 'more $compare_path/compareMessage.txt'"
     print ""
     print "File 1: $file1"
     print "File 2: $input_file"
