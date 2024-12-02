@@ -21,7 +21,8 @@ show_usage() {
   cat <<EOF
 Usage: $(basename $0) [-help|-h] [-write|-w] <directory_or_file>
   -help                      Display this help screen
-  -write                     Rewrite keys from tbtoasc in ./Repport/Write
+  -write                     Rewrite keys from tbtoasc in ./repport/Write
+  -backup                    targz the directory in ./repport/directory.tar.gz
   <directory_or_file>        Directory or file to check
 EOF
   exit 0
@@ -185,16 +186,14 @@ process_directory() {
   echo > ${keys_file}
 
   # backup directory
-  print " Tar gz directory processing ... "
-  tar -vczf "$tar_path" -C "$(dirname "$dir")" "$(basename "$dir")"
-  print ""
-  print " Tar gz directory process finished "
-  print ""
-   
-  # for file in "$dir"/*.asc "$dir"/*.fcv; do
-  #   [ -f "$file" ] || continue
-  #   [ "${file##*.}" = "asc" ] && process_asc_file "$file" || process_fcv_file "$file"
-  # done   
+  # Check if the backup option is enabled (Option_Backup is set)
+  if [ -n "${Option_Backup}" ]; then
+    print " Tar gz directory processing ... "
+    tar -vczf "$tar_path" -C "$(dirname "$dir")" "$(basename "$dir")"
+    print ""
+    print " Tar gz directory process finished "
+    print ""
+  fi 
 
   #Initialization of the result file
   echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
@@ -484,6 +483,7 @@ main() {
     case "$1" in
       -h|-help) Option_Help=true ;;
       -w|-write) Option_Write=true ;;
+      -b|-backup) Option_Backup=true ;;
       *) directoryOrFile=$(get_absolute_path $1) ;;
     esac
     shift
