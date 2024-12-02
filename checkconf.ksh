@@ -115,6 +115,7 @@ process_asc_file() {
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' $tbtoasc_file
 
   # Compare the tbtoasc and txt files
+  clean_duplicate "$tbtoasc_file" "$txt_file"
   compare_files "$tbtoasc_file" "$txt_file"
 }
 
@@ -297,7 +298,7 @@ process_asc_dir() {
     if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
       echo "${dir};${file};${line};KEY_ERROR" >> ${repport_csv}
     else
-      clean_duplicate
+      clean_duplicate ${tbtoasc_1key_asc} ${file_1key_asc}
       compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${repport_csv}
     fi
   done < "${keys_file}"
@@ -328,29 +329,33 @@ process_asc_dir() {
     done < "${keys_file}"
   fi
 }
+
 clean_duplicate(){
   # treatment of false duplicates starting with \champ= 
-  
+  typeset file1="$1"
+  typeset file2="$2"
+
   # Prepare data path
-  typeset temp_file_1key_asc="${asc_dir_path}/temp_file_1key_asc"
-  typeset temp_tbtoasc_1key_asc="${asc_dir_path}/temp_tbtoasc_1key_asc"
+  typeset temp_file1="${asc_dir_path}/temp_file1"
+  typeset temp_file2="${asc_dir_path}/temp_file2"
   
-  set -A FieldsNoValue_Stdtbl $(cat ${tbtoasc_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
-  set -A FieldsNoValue_File $(cat ${file_1key_asc} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
+  set -A FieldsNoValue_tbtoasc $(cat ${file1} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
+  set -A FieldsNoValue_File $(cat ${file2} | awk 'match($1,/(^\\\S+=)$/,output) {print "\\"output[1]}')
   
-  if [[ ${FieldsNoValue_Stdtbl[0]} ]];
+  if [[ ${FieldsNoValue_tbtoasc[0]} ]];
   then
-    for (( i=0; i<${#FieldsNoValue_Stdtbl[*]}; i++ )) ; do
-      cat ${file_1key_asc} | awk -v field="${FieldsNoValue_Stdtbl[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file_1key_asc} && mv ${temp_file_1key_asc} ${file_1key_asc}
+    for (( i=0; i<${#FieldsNoValue_tbtoasc[*]}; i++ )) ; do
+      cat ${file2} | awk -v field="${FieldsNoValue_tbtoasc[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file2} && mv ${temp_file2} ${file2}
     done
   fi
   if [[ ${FieldsNoValue_File[0]} ]];
   then
     for (( i=0; i<${#FieldsNoValue_File[*]}; i++ )) ; do
-      cat ${file_1key_asc} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_tbtoasc_1key_asc} && mv ${temp_tbtoasc_1key_asc} ${tbtoasc_1key_asc}
+      cat ${file1} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file1} && mv ${temp_file1} ${file1}
     done
   fi
 }
+
 ####################################################
 #             process FCV DIR                      #
 ####################################################
