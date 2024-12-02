@@ -229,16 +229,16 @@ process_asc_dir() {
   fi
 
   # Prepare data path
+  typeset tbtoasc_error_log_rewritten="${report_files_directory_path}/tbtoasc_error_log_rewritten"
+  typeset tbtoasc_error_log="${report_files_directory_path}/tbtoasc_error_log"
   typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
-  typeset keys_empty_file="${report_files_directory_path}/keys_empty_file"
-  typeset keys_file_Error="${report_files_directory_path}/keys_file_Error"
-  typeset stdtbl_error_log="${report_files_directory_path}/stdtbl_error_log"
-  typeset stdtbl_1key_asc="${report_files_directory_path}/stdtbl_1key.asc"
+  typeset tbtoasc_1key_asc="${report_files_directory_path}/tbtoasc_1key_asc"
   typeset header_file="${report_files_directory_path}/commentHeader.txt"
 
   fileName=$(basename "${input_file}")
   fileExt="${input_file##*.}"
 
+  # Build keys_file.txt file 
   # find keys in asc file and remove [ and ] in the keys_file.txt file
   awk '
     !/^[[:space:]]/ &&
@@ -246,32 +246,6 @@ process_asc_dir() {
         print output[1]
     }
   ' "${input_file}" 2>/dev/null > "${keys_file}"
-
-  # Check if the write option is enabled (Option_Write is set)
-  if [ -n "${Option_Write}" ]; then
-    rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
-    # Build comment header
-    awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
-
-    # Write comment header to the output file
-    {
-      cat "${header_file}"
-      echo "!"
-      echo "!  $(stamp) : checkconf : rewrite of key values by tbtoasc - ${fileName}"
-      echo "!"
-    } >> "${rewritten_file}"
-
-    # Process each line in the keys_file
-    while read -r line; do
-      tbtoasc -e "$line" 2>"${keys_file_Error}" >> "${rewritten_file}"
-      
-      # Check if the keys_file_Error is not empty, indicating errors
-      if [ -s "${keys_file_Error}" ]; then
-        echo "[${line}]" >> "${rewritten_file}"
-        echo "\\" >> "${rewritten_file}"
-      fi
-    done < "${keys_file}"
-  fi
   
   # Build fileskeys.csv file
   while read -r line; do
@@ -291,26 +265,46 @@ process_asc_dir() {
       }
     ' "${input_file}" > "${file_1key_asc}"
   
-    # Build stdtbl_1key_asc file
-      tbtoasc -e "$line" >"${stdtbl_1key_asc}" 2>"${stdtbl_error_log}"
-      #tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
-  
- 
+    # Build tbtoasc_1key_asc file
+    tbtoasc -e "$line" >"${tbtoasc_1key_asc}" 2>"${tbtoasc_error_log}"
+      
     # delete carriage return after '=' when there is data
-    sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${stdtbl_1key_asc}
+    sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${tbtoasc_1key_asc}
     sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${file_1key_asc}
   
-    #
-    # Compare tables
-    #
-
-    if [[ $(cat ${stdtbl_error_log} | awk '/^Error\s/ {print $0}') ]]; then
+    # Compare tbtoasc_1key_asc vs file_1key_asc
+    if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
       echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
     else
-      compare_stdtbl -unchanged ${stdtbl_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
     fi
   done < "${keys_file}"
-  if ${Option_Write} ; then
+  
+  # Check if the write option is enabled (Option_Write is set)
+  if [ -n "${Option_Write}" ]; then
+    rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
+    # Build comment header
+    awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
+
+    # Write comment header to the output file
+    {
+      cat "${header_file}"
+      echo "!"
+      echo "!  $(stamp) : checkconf : rewrite of key values by tbtoasc - ${fileName}"
+      echo "!"
+    } >> "${rewritten_file}"
+
+    # Process each line in the keys_file
+    while read -r line; do
+      tbtoasc -e "$line" 2>"${tbtoasc_error_log_rewritten}" >> "${rewritten_file}"
+      
+      # Check if the tbtoasc_error_log_rewritten is not empty, indicating errors
+      if [ -s "${tbtoasc_error_log_rewritten}" ]; then
+        echo "[${line}]" >> "${rewritten_file}"
+        echo "\\" >> "${rewritten_file}"
+      fi
+    done < "${keys_file}"
+    
     print ""
     print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
     print ""
@@ -318,31 +312,39 @@ process_asc_dir() {
 }
 
 process_fcv_dir() {
-  #
-  # case *.fcv in $dir directory
-  #
+  typeset input_file="$1"
+  # Validate input file
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: File '$input_file' not found." >&2
+    return 1
+  fi
 
   # Prepare data path
-  typeset temp_dir_tbtoasc_error_fcv="${report_files_directory_path}/temp_dir_tbtoasc_error_fcv"  # Temporary file for storing errors during tbtoasc conversion
-  typeset temp_dir_tbtoasc_fcv="${report_files_directory_path}/temp_dir_tbtoasc_fcv"        # Temporary file for storing tbtoasc conversion result
-  typeset temp_dir_fcv="${report_files_directory_path}/temp_dir_fcv"
+  typeset stdcomp_error_log="${report_files_directory_path}/stdcomp_error_log"  # Temporary file for storing errors during tbtoasc conversion
+  typeset stdcomp_fcv_dir="${report_files_directory_path}/stdcomp_fcv_dir"        # Temporary file for storing tbtoasc conversion result
+  typeset file_fcv_dir="${report_files_directory_path}/file_fcv_dir"
 
+  fileName=$(basename "${input_file}")
+  fileExt="${input_file##*.}"
+
+  # Build file_fcv_dir file
   # StdComp -A to obtain asctotb format
-  stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_fcv}
+  stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${file_fcv_dir}
 
-  echo ${file} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
+  # Build keys_file.txt file 
+  # find keys in the filename of fcv file (begin by FCV and replace _ by #)
+  echo ${filename} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
 
-  # Build temp.fcv file
+  # Build stdcomp_fcv_dir file
   for line in $(cat ${keys_file}) ; do
-      tbtoasc -e "$line" 2>${temp_dir_tbtoasc_error_fcv} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${temp_dir_tbtoasc_fcv}
+      tbtoasc -e "$line" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
   done
-  #
-  # Compare tables
-  #
-  if [[ $(cat ${temp_dir_tbtoasc_error_fcv} | awk '/^Error\s/ {print $0}') ]]; then
+  
+  # Compare stdcomp_fcv_dir vs file_fcv_dir
+  if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
     echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
   else
-    compare_stdtbl -unchanged ${temp_dir_tbtoasc_fcv} ${temp_dir_fcv} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${file}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
   fi
 
 }
