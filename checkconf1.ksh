@@ -298,6 +298,9 @@ process_asc_dir() {
   
   # Check if the write option is enabled (Option_Write is set)
   if [ -n "${Option_Write}" ]; then
+
+    echo ${Option_Write}
+  
     rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
     # Build comment header
     awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
