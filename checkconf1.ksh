@@ -324,6 +324,11 @@ process_fcv_dir() {
   typeset stdcomp_fcv_dir="${report_files_directory_path}/stdcomp_fcv_dir"        # Temporary file for storing tbtoasc conversion result
   typeset file_fcv_dir="${report_files_directory_path}/file_fcv_dir"
 
+  # Ensure no confirmation is needed for overwrites and clear previous files
+  > "$stdcomp_error_log"
+  > "$stdcomp_fcv_dir"
+  > "$file_fcv_dir"
+
   fileName=$(basename "${input_file}")
   fileExt="${input_file##*.}"
 
