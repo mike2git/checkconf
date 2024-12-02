@@ -223,9 +223,8 @@ process_directory() {
   fi 
   # add statistical
   add_statistical "$repport_csv"
-  
+
   if [ "${Option_Write}" = "true" ]; then
-    print ""
     print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
     print ""
   fi
