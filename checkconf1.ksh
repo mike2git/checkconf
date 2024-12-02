@@ -178,7 +178,7 @@ process_directory() {
   # Prepare data path
   typeset tar_path="${report_directory_path}/directory.tar.gz"
   typeset keys_file="${report_files_directory_path}/keys.txt"
-  typeset fileskeys_csv="${report_directory_path}/fileskeys.csv"
+  typeset report_csv="${report_directory_path}/report.csv"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   echo > ${keys_file}
@@ -196,7 +196,7 @@ process_directory() {
   # done   
 
   #Initialization of the result file
-  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${fileskeys_csv}
+  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
       
   #
   # case *.asc or *.fcv in $dir directory
@@ -218,7 +218,7 @@ process_directory() {
     done
   fi 
   # add statistical
-  add_statistical "$fileskeys_csv"
+  add_statistical "$report_csv"
 }  
 process_asc_dir() { 
   typeset input_file="$1"
@@ -234,6 +234,13 @@ process_asc_dir() {
   typeset file_1key_asc="${report_files_directory_path}/file_1key_asc"
   typeset tbtoasc_1key_asc="${report_files_directory_path}/tbtoasc_1key_asc"
   typeset header_file="${report_files_directory_path}/commentHeader.txt"
+
+    # Clear or create the output files to avoid appending to old data
+  > "$tbtoasc_error_log_rewritten"
+  > "$tbtoasc_error_log"
+  > "$file_1key_asc"
+  > "$tbtoasc_1key_asc"
+  > "$header_file"
 
   fileName=$(basename "${input_file}")
   fileExt="${input_file##*.}"
@@ -274,9 +281,9 @@ process_asc_dir() {
   
     # Compare tbtoasc_1key_asc vs file_1key_asc
     if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-      echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
+      echo "${dir};${file};${line};KEY_ERROR" >> ${report_csv}
     else
-      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${report_csv}
     fi
   done < "${keys_file}"
   
@@ -341,24 +348,25 @@ process_fcv_dir() {
   echo ${fileName} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
 
   # Build stdcomp_fcv_dir file
-  for line in $(cat ${keys_file}) ; do
-      tbtoasc -e "$line" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
-  done
+  #for line in $(cat ${keys_file}) ; do
+  typeset key = $(cat ${keys_file})
+  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
+  #done
   
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-    echo "${dir};${file};${line};KEY_ERROR" >> ${fileskeys_csv}
+    echo "${dir};${file};${key};KEY_ERROR" >> ${report_csv}
   else
-    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${fileskeys_csv}
+    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UPDATED"}' >> ${report_csv}
   fi
 
 }
 
 add_statistical() {
   # Define a temporary output file
-  temp_output_file="${fileskeys_csv}.tmp"
+  temp_output_file="${report_csv}.tmp"
   
-  # Add statistical columns to fileskeys_csv
+  # Add statistical columns to report_csv
   awk -F ";" '
     NR == 1 {
       print $0; next
@@ -386,10 +394,10 @@ add_statistical() {
         doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
-  ' "$fileskeys_csv" > "$temp_output_file" && mv "$temp_output_file" "$fileskeys_csv"
+  ' "$report_csv" > "$temp_output_file" && mv "$temp_output_file" "$report_csv"
 
   print ""
-  print " ---> See the array result:       $fileskeys_csv"
+  print " ---> See the array result:       $report_csv"
   print " ---> And the backup directory:   $tar_path"
   print ""
 }
