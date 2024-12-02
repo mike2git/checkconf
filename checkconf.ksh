@@ -351,7 +351,7 @@ clean_duplicate(){
   if [[ ${FieldsNoValue_File[0]} ]];
   then
     for (( i=0; i<${#FieldsNoValue_File[*]}; i++ )) ; do
-      cat ${file1} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file1} && mv ${temp_file1} ${file1}
+      cat ${file2} | awk -v field="${FieldsNoValue_File[$i]}" '{if ($0 !~ /=$/) {{ if ($0 ~ field) { match($1,/(^\\\S+=)(\S+$)/,output); print output[1] "\n" output[2] } else {print $0}}} else {print $0} }' 2>/dev/null > ${temp_file1} && mv ${temp_file1} ${file1}
     done
   fi
 }
