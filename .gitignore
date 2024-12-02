@@ -1,7 +1,8 @@
-/Repport/Write
-/Repport/*.tar.gz
-/Repport/fileskeys.csv
-/Repport/Files
-/Files
+/fcv_file
+/asc_file
+/fcv_dir
+/asc_dir
+/backup
+/repport/repport.csv
 /.vscode
 /.git
