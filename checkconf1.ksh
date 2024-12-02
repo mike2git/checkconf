@@ -191,7 +191,7 @@ process_directory() {
 
   # backup directory
   # Check if the backup option is enabled (Option_Backup is set)
-  if [ -n "${Option_Backup}" ]; then
+  if [ "${Option_Backup}" = "true" ]; then
     print " Tar gz directory processing ... "
     tar -vczf "$tar_path" -C "$(dirname "$dir")" "$(basename "$dir")"
     print ""
@@ -297,7 +297,7 @@ process_asc_dir() {
   done < "${keys_file}"
   
   # Check if the write option is enabled (Option_Write is set)
-  if [ -n "${Option_Write}" ]; then
+  if [ "${Option_Write}" = "true" ]; then
 
     echo ${Option_Write}
   
@@ -416,7 +416,9 @@ add_statistical() {
 
   print ""
   print " ---> See the array result:       $repport_csv"
-  print " ---> And the backup directory:   $tar_path"
+  if [ "${Option_Backup}" = "true" ]; then
+    print " ---> And the backup directory:   $tar_path"
+  fi
   print ""
 }
 
@@ -484,6 +486,7 @@ main() {
   typeset directoryOrFile=""
   typeset Option_Help=false
   typeset Option_Write=false
+  typeset Option_Backup=false
 
   # Parse arguments
   while [ $# -ge 1 ]; do
