@@ -223,6 +223,12 @@ process_directory() {
   fi 
   # add statistical
   add_statistical "$repport_csv"
+  
+  if [ "${Option_Write}" = "true" ]; then
+    print ""
+    print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
+    print ""
+  fi
 }
 
 ####################################################
@@ -298,9 +304,6 @@ process_asc_dir() {
   
   # Check if the write option is enabled (Option_Write is set)
   if [ "${Option_Write}" = "true" ]; then
-
-    echo ${Option_Write}
-  
     rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
     # Build comment header
     awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
@@ -323,10 +326,6 @@ process_asc_dir() {
         echo "\\" >> "${rewritten_file}"
       fi
     done < "${keys_file}"
-    
-    print ""
-    print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
-    print ""
   fi
 }
 
