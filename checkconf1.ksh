@@ -36,7 +36,7 @@ initialize_paths() {
   compare_path="${base_path}/compare"
   repport_directory_path="${base_path}/repport"
   fcv_dir_path="${base_path}/fcv_dir"
-  asc-dir-path="${base_path}/asc_dir"
+  asc_dir_path="${base_path}/asc_dir"
   rewritten_asc_fcv_dir_path="${base_path}/rewritten_asc_fcv_dir"
   backup_path="${base_path}/backup"
 
