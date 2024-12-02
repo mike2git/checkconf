@@ -50,7 +50,7 @@ check_utilities() {
 }
 
 ####################################################
-#                 ASC FILE                         #
+#             process ASC FILE                     #
 ####################################################
 
 # Process to compare an ASC file
@@ -114,7 +114,7 @@ process_asc_file() {
 }
 
 ####################################################
-#                 FCV FILE                         #
+#             process FCV FILE                     #
 ####################################################
 
 # Process to compare an FCV file
@@ -161,8 +161,9 @@ process_fcv_file() {
   print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" | grep -E "fcv.i" | awk -F'"' '{print $2}')"
   print ""
 }
+
 ####################################################
-#              DIRECTORY ASC/FCV                   #
+#             process DIRECTORY                    #
 ####################################################
 
 # Process a directory of ASC or FCV files
@@ -219,7 +220,12 @@ process_directory() {
   fi 
   # add statistical
   add_statistical "$report_csv"
-}  
+}
+
+####################################################
+#             process ASC DIR                      #
+####################################################
+
 process_asc_dir() { 
   typeset input_file="$1"
   # Validate input file
@@ -318,6 +324,10 @@ process_asc_dir() {
   fi
 }
 
+####################################################
+#             process FCV DIR                      #
+####################################################
+
 process_fcv_dir() {
   typeset input_file="$1"
   # Validate input file
@@ -348,11 +358,9 @@ process_fcv_dir() {
   echo ${fileName} | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' |awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > ${keys_file}
 
   # Build stdcomp_fcv_dir file
-  #for line in $(cat ${keys_file}) ; do
   typeset key="$(cat ${keys_file})"
   tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
-  #done
-  
+
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
     echo "${dir};${file};${key};KEY_ERROR" >> ${report_csv}
@@ -362,9 +370,13 @@ process_fcv_dir() {
 
 }
 
+####################################################
+#             add statistical                      #
+####################################################
+
 add_statistical() {
   # Define a temporary output file
-  temp_output_file="${report_csv}.tmp"
+  report_csv_tmp="${report_csv}.tmp"
   
   # Add statistical columns to report_csv
   awk -F ";" '
@@ -394,13 +406,18 @@ add_statistical() {
         doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
-  ' "$report_csv" > "$temp_output_file" && mv "$temp_output_file" "$report_csv"
+  ' "$report_csv" > "$report_csv_tmp" && mv "$report_csv_tmp" "$report_csv"
 
   print ""
   print " ---> See the array result:       $report_csv"
   print " ---> And the backup directory:   $tar_path"
   print ""
 }
+
+####################################################
+#             compare file                         #
+####################################################
+
 # Compare two files and display results
 compare_files() {
   typeset file1="$1"
