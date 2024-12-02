@@ -115,7 +115,7 @@ process_asc_file() {
 	sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' $tbtoasc_file
 
   # Compare the tbtoasc and txt files
-  clean_duplicate "$tbtoasc_file" "$txt_file"
+  #clean_duplicate "$tbtoasc_file" "$txt_file"
   compare_files "$tbtoasc_file" "$txt_file"
 }
 
@@ -298,7 +298,7 @@ process_asc_dir() {
     if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
       echo "${dir};${file};${line};KEY_ERROR" >> ${repport_csv}
     else
-      clean_duplicate ${tbtoasc_1key_asc} ${file_1key_asc}
+      #clean_duplicate ${tbtoasc_1key_asc} ${file_1key_asc}
       compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${repport_csv}
     fi
   done < "${keys_file}"
