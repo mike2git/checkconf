@@ -34,13 +34,13 @@ initialize_paths() {
   fcv_file_path="${base_path}/fcv_file"
   asc_file_path="${base_path}/asc_file"
   compare_path="${base_path}/compare"
-  repport_directory_path="${base_path}/repport"
+  repport_path="${base_path}/repport"
   fcv_dir_path="${base_path}/fcv_dir"
   asc_dir_path="${base_path}/asc_dir"
   rewritten_asc_fcv_dir_path="${base_path}/rewritten_asc_fcv_dir"
   backup_path="${base_path}/backup"
 
-  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$repport_directory_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
+  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$repport_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
 }
 
 # Verify the availability of required utilities
