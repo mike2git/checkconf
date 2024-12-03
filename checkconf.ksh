@@ -383,7 +383,7 @@ process_fcv_dir() {
 
   # Build file_fcv_dir file
   # StdComp -A to obtain asctotb format
-  stdcomp -A ${file} 2>/dev/null | grep -av "\?compiled" | grep -av "SVN iden" | grep -av "SCCS ident" > ${file_fcv_dir}
+  stdcomp -A ${file} 2>/dev/null | grep -Eav "\?compiled|SVN iden|SCCS ident" > ${file_fcv_dir}
 
   # Build keys_file.txt file 
   # find keys in the fileName of fcv file (begin by FCV and replace _ by #)
@@ -391,7 +391,7 @@ process_fcv_dir() {
 
   # Build stdcomp_fcv_dir file
   typeset key="$(cat ${keys_file})"
-  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -av "\?compiled" | grep -av "SVN iden" | grep -av "SCCS ident" > ${stdcomp_fcv_dir}
+  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -Eav "\?compiled|SVN iden|SCCS ident" > ${stdcomp_fcv_dir}
 
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
