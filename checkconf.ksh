@@ -146,25 +146,25 @@ process_fcv_file() {
 
   # Generate the fileFromTxtfile.fcv using stdcomp and filter out unnecessary lines
   # stdcomp -A : Emit preprocessed data suitable for asctotb
-  stdcomp -A "$(basename "$input_file")" | grep -Ev "?compiled|SVN iden|SCCS ident" > "$txt_file"
+  stdcomp -A "$(basename "$input_file")" | grep -Eav "\?compiled|SVN iden|SCCS ident" > "$txt_file"
 
     # Create a list of keys from the file name, replacing underscores with hashes
   echo "$(basename "$input_file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
 
   # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
   while read -r key; do
-    tbtoasc -e "$key" | grep -Ev "?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
+    tbtoasc -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
   done < "$keys_file"
 
   # Display fcv.i files
   print ""
-  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" | grep -E "fcv.i" | awk -F'"' '{print $2}')"
+  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}')"
 
   # Compare the stdcomp_file with the original file to validate the changes
   compare_files "$stdcomp_file" "$txt_file"
 
   # Display fcv.i files
-  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -E "?line" | grep -E "fcv.i" | awk -F'"' '{print $2}')"
+  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}')"
   print ""
 }
 
@@ -383,7 +383,7 @@ process_fcv_dir() {
 
   # Build file_fcv_dir file
   # StdComp -A to obtain asctotb format
-  stdcomp -A ${file} 2>/dev/null | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${file_fcv_dir}
+  stdcomp -A ${file} 2>/dev/null | grep -av "\?compiled" | grep -av "SVN iden" | grep -av "SCCS ident" > ${file_fcv_dir}
 
   # Build keys_file.txt file 
   # find keys in the fileName of fcv file (begin by FCV and replace _ by #)
@@ -391,7 +391,7 @@ process_fcv_dir() {
 
   # Build stdcomp_fcv_dir file
   typeset key="$(cat ${keys_file})"
-  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -v "?compiled" | grep -v "SVN iden" | grep -v "SCCS ident" > ${stdcomp_fcv_dir}
+  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -av "\?compiled" | grep -av "SVN iden" | grep -av "SCCS ident" > ${stdcomp_fcv_dir}
 
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
