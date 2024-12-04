@@ -1,8 +1,8 @@
 #!/usr/bin/ksh
 #
 # Script : checkconf.ksh
-# Compare database configuration keys with file keys (asc/fcv)
-# Usage  : checkconf.ksh [-help|-h] [-write|-w] <directory_or_file>
+# Compare database configuration keys with file keys (asc or fcv files)
+# Usage  : checkconf.ksh [-help|-h] [-write|-w] [-backup|-b] <directory_or_file>
 #
 
 # Exit with an error message
@@ -19,11 +19,13 @@ stamp() {
 # Display usage information
 show_usage() {
   cat <<EOF
-Usage: $(basename $0) [-help|-h] [-write|-w] <directory_or_file>
+Usage: $(basename $0) [-help|-h] [-write|-w] [-backup|-b] <directory_or_file>
   -help                      Display this help screen
-  -write                     Rewrite keys from tbtoasc in ./repport/Write
-  -backup                    targz the directory in ./repport/directory.tar.gz
-  <directory_or_file>        Directory or file to check
+  -write                     Process all files in the specified directory. Rewrites files using 'tbtoasc' and saves them in './rewritten_asc_fcv_dir'.
+  -backup                    Creates a compressed backup of the specified directory. The archive is saved as './backup/<directory_name>.tar.gz'.
+  <directory_or_file>        Specifies the directory or file to process.
+                             - If a directory is provided, a 'report.csv' will be generated.
+                             - If a file is provided, it will be processed individually.
 EOF
   exit 0
 }
@@ -34,13 +36,13 @@ initialize_paths() {
   fcv_file_path="${base_path}/fcv_file"
   asc_file_path="${base_path}/asc_file"
   compare_path="${base_path}/compare"
-  repport_path="${base_path}/repport"
+  report_path="${base_path}/report"
   fcv_dir_path="${base_path}/fcv_dir"
   asc_dir_path="${base_path}/asc_dir"
   rewritten_asc_fcv_dir_path="${base_path}/rewritten_asc_fcv_dir"
   backup_path="${base_path}/backup"
 
-  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$repport_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
+  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$report_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
 }
 
 # Verify the availability of required utilities
@@ -185,7 +187,7 @@ process_directory() {
   # Prepare data path
   typeset tar_path="${backup_path}/directory.tar.gz"
   typeset keys_file="${asc_dir_path}/keys.txt"
-  typeset repport_csv="${repport_path}/repport.csv"
+  typeset report_csv="${report_path}/report.csv"
 
   # Ensure no confirmation is needed for overwrites and clear previous files
   echo > ${keys_file}
@@ -201,7 +203,7 @@ process_directory() {
   fi 
 
   #Initialization of the result file
-  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${repport_csv}
+  echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
       
   #
   # case *.asc or *.fcv in $dir directory
@@ -223,7 +225,7 @@ process_directory() {
     done
   fi 
   # add statistical
-  add_statistical "$repport_csv"
+  add_statistical "$report_csv"
 
   if [ "${Option_Write}" = "true" ]; then
     print " ---> See file(s) created with write option in "${rewritten_asc_fcv_dir_path}
@@ -296,10 +298,10 @@ process_asc_dir() {
   
     # Compare tbtoasc_1key_asc vs file_1key_asc
     if [[ $(cat ${tbtoasc_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-      echo "${dir};${fileName};${line};KEY_ERROR" >> ${repport_csv}
+      echo "${dir};${fileName};${line};KEY_ERROR" >> ${report_csv}
     else
       #clean_duplicate ${tbtoasc_1key_asc} ${file_1key_asc}
-      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${repport_csv}
+      compare_stdtbl -unchanged ${tbtoasc_1key_asc} ${file_1key_asc} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${line}';KEY_UPDATED"}' >> ${report_csv}
     fi
   done < "${keys_file}"
   
@@ -395,9 +397,9 @@ process_fcv_dir() {
 
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
-    echo "${dir};${file};${key};KEY_ERROR" >> ${repport_csv}
+    echo "${dir};${file};${key};KEY_ERROR" >> ${report_csv}
   else
-    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UPDATED"}' >> ${repport_csv}
+    compare_stdtbl -unchanged ${stdcomp_fcv_dir} ${file_fcv_dir} | awk ' /-----\sUNCHANGED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UNCHANGED"} /-----\sUPDATED\sKEY/ {print "'${dir}';'${fileName}';'${key}';KEY_UPDATED"}' >> ${report_csv}
   fi
 
 }
@@ -408,9 +410,9 @@ process_fcv_dir() {
 
 add_statistical() {
   # Define a temporary output file
-  repport_csv_tmp="${repport_csv}.tmp"
+  report_csv_tmp="${report_csv}.tmp"
   
-  # Add statistical columns to repport_csv
+  # Add statistical columns to report_csv
   awk -F ";" '
     NR == 1 {
       print $0; next
@@ -438,10 +440,10 @@ add_statistical() {
         doublefield3[field3[numline]]";"listdoublefield2[field3[numline]]
       }
     }
-  ' "$repport_csv" > "$repport_csv_tmp" && mv "$repport_csv_tmp" "$repport_csv"
+  ' "$report_csv" > "$report_csv_tmp" && mv "$report_csv_tmp" "$report_csv"
 
   print ""
-  print " ---> See the array result:       $repport_csv"
+  print " ---> See the array result:       $report_csv"
   if [ "${Option_Backup}" = "true" ]; then
     print " ---> And the backup directory:   $tar_path"
   fi
