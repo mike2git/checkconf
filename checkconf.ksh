@@ -4,6 +4,9 @@
 # Compare database configuration keys with file keys (asc or fcv files)
 # Usage  : checkconf.ksh [-help|-h] [-write|-w] [-backup|-b] <directory_or_file>
 #
+# Author : Mickaël Seror
+# Date   : November 2024
+#
 
 # Exit with an error message
 die() {
