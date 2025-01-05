@@ -35,7 +35,7 @@ EOF
 
 # Initialize necessary paths and directories
 initialize_paths() {
-  base_path="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
+  base_path="$(cd "$(dirname "$0")"; pwd)"
   fcv_file_path="${base_path}/fcv_file"
   asc_file_path="${base_path}/asc_file"
   compare_path="${base_path}/compare"
@@ -205,29 +205,18 @@ process_directory() {
     print ""
   fi 
 
-  #Initialization of the result file
+  # Initialization of the result file
   echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
       
-  #
-  # case *.asc or *.fcv in $dir directory
-  #
-  total_file_count=$(find "$dir" -maxdepth 1 -type f \( -name '*.asc' -o -name '*.fcv' \) 2>/dev/null | wc -l | awk '{print $1}')
+  # Process *.asc or *.fcv files in $dir directory
+  find "$dir" -maxdepth 1 -type f \( -name '*.asc' -o -name '*.fcv' \) | while read -r file; do
+    [ -f "$file" ] || continue
+    let file_count++
+    print "File processing "$file_count"/"$total_file_count" : "$file
+    [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file" 
+  done
 
-  if [ ${total_file_count} -ge 1 ] ; then 
-    if [ ! -e "${rewritten_asc_fcv_dir_path}" ]; then
-        mkdir -p "${rewritten_asc_fcv_dir_path}"
-    else
-        rm -rf "${rewritten_asc_fcv_dir_path}" && mkdir -p "${rewritten_asc_fcv_dir_path}"
-    fi
-   
-    for file in "$dir"/*.asc "$dir"/*.fcv; do
-      [ -f "$file" ] || continue
-      let file_count++
-      print "File processing "$file_count"/"$total_file_count" : "$file
-      [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file" 
-    done
-  fi 
-  # add statistical
+  # Add statistical data
   add_statistical "$report_csv"
 
   if [ "${Option_Write}" = "true" ]; then
@@ -531,7 +520,7 @@ main() {
   done
 
   $Option_Help && show_usage
-  [ -z "$directoryOrFile" ] && die "$USAGE"
+  [ -z "$directoryOrFile" ] && die "Error: Missing directory or file argument."
 
   initialize_paths
   check_utilities
