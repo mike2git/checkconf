@@ -207,13 +207,22 @@ process_directory() {
 
   # Initialization of the result file
   echo "Path;File;Key;Key_chg;File_key_nb;File_chg;Key_dbl;File_dbl" > ${report_csv}
-      
-  # Process *.asc or *.fcv files in $dir directory
+
+  # Count total number of *.asc and *.fcv files in the directory
+  total_file_count=$(find "$dir" -maxdepth 1 -type f \( -name '*.asc' -o -name '*.fcv' \) | wc -l)
+
+  # Process files in $dir directory
+  file_count=0
   find "$dir" -maxdepth 1 -type f \( -name '*.asc' -o -name '*.fcv' \) | while read -r file; do
-    [ -f "$file" ] || continue
-    let file_count++
-    print "File processing "$file_count"/"$total_file_count" : "$file
-    [ "${file##*.}" = "asc" ] && process_asc_dir "$file" || process_fcv_dir "$file" 
+      [ -f "$file" ] || continue
+      file_count=$((file_count + 1))
+      print "File processing $file_count/$total_file_count : $file"
+
+      # Determine the processing function based on file extension
+      case "${file##*.}" in
+          asc) process_asc_dir "$file" ;;
+          fcv) process_fcv_dir "$file" ;;
+      esac
   done
 
   # Add statistical data
