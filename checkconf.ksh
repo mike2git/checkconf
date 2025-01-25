@@ -35,7 +35,7 @@ EOF
 
 # Initialize necessary paths and directories
 initialize_paths() {
-  base_path="$(cd "$(dirname "$0")"; pwd)"
+  base_path="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
   fcv_file_path="${base_path}/fcv_file"
   asc_file_path="${base_path}/asc_file"
   compare_path="${base_path}/compare"
