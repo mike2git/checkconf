@@ -301,7 +301,8 @@ process_asc_dir() {
   if [ "${Option_Write}" = "true" ]; then
     rewritten_file="${rewritten_asc_fcv_dir_path}/${fileName}"
     # Build comment header
-    awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
+    # awk '/^[!]/ {print} /[^!]/ {exit}' "${input_file}" 2>/dev/null > "${header_file}"
+    awk '/^!/' "$input_file" > "${header_file}"
 
     # Write comment header to the output file
     {
