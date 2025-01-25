@@ -106,7 +106,7 @@ process_asc_file() {
 
   # Rewrite and validate keys
   while read -r key; do
-    tbtoasc -e "$key" >> "$tbtoasc_file" 2>>"$tbtoasc_error_file"
+    tbtoasc -w 9999 -e "$key" >> "$tbtoasc_file" 2>>"$tbtoasc_error_file"
 
     # If an error is detected, remove the key and its associated content block
     if grep -q '^Error' "$tbtoasc_error_file"; then
@@ -158,7 +158,7 @@ process_fcv_file() {
 
   # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
   while read -r key; do
-    tbtoasc -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
+    tbtoasc -w 9999 -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
   done < "$keys_file"
 
   # Display fcv.i files
@@ -291,7 +291,7 @@ process_asc_dir() {
     ' "${input_file}" > "${file_1key_asc}"
   
     # Build tbtoasc_1key_asc file
-    tbtoasc -e "$line" >"${tbtoasc_1key_asc}" 2>"${tbtoasc_error_log}"
+    tbtoasc -w 9999 -e "$line" >"${tbtoasc_1key_asc}" 2>"${tbtoasc_error_log}"
       
     # delete carriage return after '=' when there is data
     sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' ${tbtoasc_1key_asc}
@@ -323,7 +323,7 @@ process_asc_dir() {
 
     # Process each line in the keys_file
     while read -r line; do
-      tbtoasc -e "$line" 2>"${tbtoasc_error_log_rewritten}" >> "${rewritten_file}"
+      tbtoasc -w 9999 -e "$line" 2>"${tbtoasc_error_log_rewritten}" >> "${rewritten_file}"
       
       # Check if the tbtoasc_error_log_rewritten is not empty, indicating errors
       if [ -s "${tbtoasc_error_log_rewritten}" ]; then
@@ -395,7 +395,7 @@ process_fcv_dir() {
 
   # Build stdcomp_fcv_dir file
   typeset key="$(cat ${keys_file})"
-  tbtoasc -e "${key}" 2>${stdcomp_error_log} | grep -Eav "\?compiled|SVN iden|SCCS ident" > ${stdcomp_fcv_dir}
+  tbtoasc -w 9999 -e "${key}" 2>${stdcomp_error_log} | grep -Eav "\?compiled|SVN iden|SCCS ident" > ${stdcomp_fcv_dir}
 
   # Compare stdcomp_fcv_dir vs file_fcv_dir
   if [[ $(cat ${stdcomp_error_log} | awk '/^Error\s/ {print $0}') ]]; then
