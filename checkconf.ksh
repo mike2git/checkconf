@@ -319,7 +319,7 @@ process_asc_dir() {
       echo "!"
       echo "!  $(stamp) : checkconf : rewrite of key values by tbtoasc - ${fileName}"
       echo "!"
-    } >> "${rewritten_file}"
+    } > "${rewritten_file}"
 
     # Process each line in the keys_file
     while read -r line; do
