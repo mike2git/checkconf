@@ -1,7 +1,8 @@
 /fcv_file
 /asc_file
 /fcv_dir
-/asc_dir
+/asc_dir 
+/rewritten_asc_fcv_dir
 /backup
 /report/report.csv
 /compare
