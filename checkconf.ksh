@@ -328,7 +328,7 @@ process_asc_dir() {
       # Check if the tbtoasc_error_log_rewritten is not empty, indicating errors
       if [ -s "${tbtoasc_error_log_rewritten}" ]; then
         echo "[${line}]" >> "${rewritten_file}"
-        echo "\\" >> "${rewritten_file}"
+        echo "\\\\" >> "${rewritten_file}"
       fi
     done < "${keys_file}"
   fi
