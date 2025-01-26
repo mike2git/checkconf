@@ -111,7 +111,7 @@ process_asc_file() {
     # If an error is detected, remove the key and its associated content block
     if grep -q '^Error' "$tbtoasc_error_file"; then
       # sed -i "/$key/,/\\\\/d" "$txt_file"
-      sed -i "/$key/,/\\\\/c\$key\n\\\\" "$txt_file"
+      sed -i "/\[$key\]/,/\\\\/c\\[$key\]\n\\\\" "$txt_file"
     fi
   done < "$keys_file"
 
