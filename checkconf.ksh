@@ -107,11 +107,12 @@ process_asc_file() {
   # Rewrite and validate keys
   while read -r key; do
     tbtoasc -w 9999 -e "$key" >> "$tbtoasc_file" 2>>"$tbtoasc_error_file"
-
+    cat "$tbtoasc_error_file"
     # If an error is detected, remove the key and its associated content block
     if grep -q '^Error' "$tbtoasc_error_file"; then
       # sed -i "/$key/,/\\\\/d" "$txt_file"
       # sed -i "/\[$key\]/,/\\\\/c\\[$key\]\n\\\\" "$txt_file"
+      echo "Error: Key '$key' could not be processed. Removing the key and its content block."
       sed -i "/$key/,/\\\\/c\\$key\\n\\\\" "$txt_file"
     fi
   done < "$keys_file"
