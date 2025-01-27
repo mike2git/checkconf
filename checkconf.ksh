@@ -106,7 +106,7 @@ process_asc_file() {
 
   # Rewrite and validate keys
   while read -r key; do
-    tbtoasc -w 9999 -e "$key" >> "$tbtoasc_file" 2>>"$tbtoasc_error_file"
+    tbtoasc -w 9999 -e "$key" >> "$tbtoasc_file" 2>"$tbtoasc_error_file"
     cat "$tbtoasc_error_file"
     # If an error is detected, remove the key and its associated content block
     if grep -q '^Error' "$tbtoasc_error_file"; then
