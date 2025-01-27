@@ -112,8 +112,10 @@ process_asc_file() {
     if grep -q '^Error' "$tbtoasc_error_file"; then
       # sed -i "/$key/,/\\\\/d" "$txt_file"
       # sed -i "/\[$key\]/,/\\\\/c\\[$key\]\n\\\\" "$txt_file"
-      echo "Error: Key '$key' could not be processed. Removing the key and its content block."
-      sed -i "/$key/,/\\\\/c\\$key\\n\\\\" "$txt_file"
+      # echo "Error: Key '$key' could not be processed. Removing the key and its content block."
+      # sed -i "/$key/,/\\\\/c\\$key\\n\\\\" "$txt_file"
+      echo "[$key]" >> "$tbtoasc_file"
+      echo "\\" >> "$tbtoasc_file"
     fi
   done < "$keys_file"
 
