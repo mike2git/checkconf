@@ -45,7 +45,14 @@ initialize_paths() {
   rewritten_asc_fcv_dir_path="${base_path}/rewritten_asc_fcv_dir"
   backup_path="${base_path}/backup"
 
-  mkdir -p "$fcv_file_path" "$asc_file_path" "$compare_path" "$report_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path"
+  # List of directories
+  dir_list=("$fcv_file_path" "$asc_file_path" "$compare_path" "$report_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path")
+
+  # Reset each directory
+  for dir in "${dir_list[@]}"; do
+      [ -d "$dir" ] && rm -rf "$dir"  # Remove if exists
+      mkdir -p "$dir"  # Create directory
+  done
 }
 
 # Verify the availability of required utilities
