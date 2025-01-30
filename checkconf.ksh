@@ -338,8 +338,8 @@ process_asc_dir() {
         echo "\\\\" >> "${rewritten_file}"
       fi
       # delete carriage return after '=' when there is data except comment lines
-	    sed -ri '/^\!.*=$/ s/=//g' "${rewritten_file}"
-	    sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' "${rewritten_file}"
+	    # sed -ri '/^\!.*=$/ s/=//g' "${rewritten_file}"
+	    # sed -ri ':a;N;$!ba;s/=\n([^\\])/=\1/g' "${rewritten_file}"
     done < "${keys_file}"
   fi
 }
