@@ -170,14 +170,13 @@ process_fcv_file() {
 
   # Display fcv.i files
   print ""
-  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}')"
+  print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}' | uniq)"
 
 
   # Compare the stdcomp_file with the original file to validate the changes
   compare_files "$stdcomp_file" "$txt_file"
 
   # Display fcv file from stdcomp
-  print ""
   print "File 2 from stdcomp -A : $txt_file"
   # Display fcv.i files
   print ""
