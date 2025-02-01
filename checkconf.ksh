@@ -146,12 +146,12 @@ process_fcv_file() {
   
   # Initialize variables
   typeset txt_file="$fcv_file_path/fileFromTxtfile.fcv"
-  typeset stdcomp_file="$fcv_file_path/fileFromStdcomp.fcv"
+  typeset tbtoasc_file="$fcv_file_path/fileFromTbtoasc.fcv"
   typeset keys_file="$fcv_file_path/keys.txt"
   
   # Clear or create the output files to avoid appending to old data
   > "$txt_file"
-  > "$stdcomp_file"
+  > "$tbtoasc_file"
   > "$keys_file"
 
   cd $(dirname "$input_file")
@@ -163,9 +163,9 @@ process_fcv_file() {
     # Create a list of keys from the file name, replacing underscores with hashes
   echo "$(basename "$input_file" .fcv)" | awk '{ if (match($0,/((([A-Z])+_)*FCV_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".fcv",""); print $0 }' 2>/dev/null > "$keys_file"
 
-  # Process each key and append the result to the stdcomp_file, filtering out unnecessary lines
+  # Process each key and append the result to the tbtoasc_file, filtering out unnecessary lines
   while read -r key; do
-    tbtoasc -w 9999 -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$stdcomp_file"
+    tbtoasc -w 9999 -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$tbtoasc_file"
   done < "$keys_file"
 
   # Display fcv.i files
@@ -173,8 +173,8 @@ process_fcv_file() {
   print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}' | uniq)"
 
 
-  # Compare the stdcomp_file with the original file to validate the changes
-  compare_files "$stdcomp_file" "$txt_file"
+  # Compare the tbtoasc_file with the original file to validate the changes
+  compare_files "$tbtoasc_file" "$txt_file"
 
   # Display fcv file from stdcomp
   print "File 2 from stdcomp -A : $txt_file"
