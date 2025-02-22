@@ -99,7 +99,7 @@ process_asc_file() {
 
   # Extract keys from the input file
   awk '!/^[[:space:]]+.*/ {print}' "$txt_file" | \
-    awk 'match($1,/^\[(^[[:space:]]+)\]$/,output) {print output[1]}' > "$keys_file"
+    awk 'match($1,/^\[(.*)\]$/,output) {print output[1]}' > "$keys_file"
     cat $keys_file
 
   # Generate and add a comment header to the tbtoasc_file
