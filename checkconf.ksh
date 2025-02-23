@@ -98,9 +98,7 @@ process_asc_file() {
   cp -f "$input_file" "$txt_file"
 
   # Extract keys from the input file
-  awk '!/^[[:space:]]+.*/ {print}' "$txt_file" | \
-    awk 'match($1,/^\[(.*)\]$/,output) {print output[1]}' > "$keys_file"
-    cat $keys_file
+  awk 'match($0,/^\[(.*)\]$/,output) {print output[1]}' "$txt_file" 2>/dev/null > "$keys_file"
 
   # Generate and add a comment header to the tbtoasc_file
   # The header includes a timestamp, a description of the process, and the source file's name
@@ -277,12 +275,7 @@ process_asc_dir() {
 
   # Build keys_file.txt file 
   # find keys in asc file and remove [ and ] in the keys_file.txt file
-  awk '
-    !/^[[:space:]]/ &&
-    match($1, /^\[(.*)\]$/, output) {
-        print output[1]
-    }
-  ' "${input_file}" 2>/dev/null > "${keys_file}"
+  awk 'match($0,/^\[(.*)\]$/,output) {print output[1]}' "${input_file}" 2>/dev/null > "${keys_file}"
   
   # Build fileskeys.csv file
   while read -r line; do
