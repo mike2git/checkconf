@@ -268,7 +268,7 @@ process_val_file() {
   stdcomp -A "$(basename "$input_file")" | grep -Eav "\?compiled|SVN iden|SCCS ident" > "$txt_file"
 
     # Create a list of keys from the file name, replacing underscores with hashes
-  echo "$(basename "$input_file" .val)" | awk '{ if (match($0,/((([A-Z])+_)*MM_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".val",""); print $0 }' 2>/dev/null > "$keys_file"
+  echo "$(basename "$input_file" .val)" | awk '{ if (match($0,/((([A-Z])+_)*(MM|VALTAB|WR)_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".val",""); print $0 }' 2>/dev/null > "$keys_file"
 
   # Process each key and append the result to the tbtoasc_file, filtering out unnecessary lines
   while read -r key; do
