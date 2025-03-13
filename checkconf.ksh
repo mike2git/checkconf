@@ -27,8 +27,8 @@ Usage: $(basename $0) [-help|-h] [-write|-w] [-backup|-b] <directory_or_file>
   -write                     Process all files in the specified directory. Rewrites files using 'tbtoasc' and saves them in './rewritten_asc_fcv_dir'.
   -backup                    Creates a compressed backup of the specified directory. The archive is saved as './backup/<directory_name>.tar.gz'.
   <directory_or_file>        Specifies the directory or file to process.
-                             - If a directory is provided, a 'report.csv' will be generated.
-                             - If a file is provided, it will be processed individually.
+                             - If a directory is provided, a 'report.csv' will be generated. Supported file types are: .asc, .fcv.
+                             - If a file is provided, it will be processed individually. Supported file types are: .asc, .fcv, .idt, .val, .xpn.
 EOF
   exit 0
 }
