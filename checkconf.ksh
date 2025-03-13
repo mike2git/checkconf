@@ -602,6 +602,7 @@ main() {
     case "${directoryOrFile##*.}" in
       asc) process_asc_file "$directoryOrFile" ;;
       fcv) process_fcv_file "$directoryOrFile" ;;
+      idt) process_idt_file "$directoryOrFile" ;;
       *) die "Unsupported file type: $directoryOrFile" ;;
     esac
   elif [ -d "$directoryOrFile" ]; then
