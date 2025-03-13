@@ -189,7 +189,7 @@ process_fcv_file() {
 ####################################################
 
 # Process to compare an INDEX file
-process_index_file() {
+process_idt_file() {
   # Check if the input file exists
   typeset input_file="$1"
   if [[ ! -f "$input_file" ]]; then
