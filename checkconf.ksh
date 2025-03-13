@@ -37,6 +37,7 @@ EOF
 initialize_paths() {
   base_path="$(cd "$(dirname "$(readlink -f "$0")")"; pwd)"
   fcv_file_path="${base_path}/fcv_file"
+  index_file_path="${base_path}/index_file"
   asc_file_path="${base_path}/asc_file"
   compare_path="${base_path}/compare"
   report_path="${base_path}/report"
@@ -46,7 +47,7 @@ initialize_paths() {
   backup_path="${base_path}/backup"
 
   # List of directories
-  dir_list=("$fcv_file_path" "$asc_file_path" "$compare_path" "$report_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path")
+  dir_list=("$index_file_path" "$fcv_file_path" "$asc_file_path" "$compare_path" "$report_path" "$fcv_dir_path" "$asc_dir_path" "$rewritten_asc_fcv_dir_path" "$backup_path")
 
   # Reset each directory
   for dir in "${dir_list[@]}"; do
@@ -180,6 +181,59 @@ process_fcv_file() {
   # Display fcv.i files
   print ""
   print "fcv.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "fcv.i" | awk -F'"' '{print $2}' | uniq)"
+  print ""
+}
+
+####################################################
+#             process INDEX FILE                     #
+####################################################
+
+# Process to compare an INDEX file
+process_index_file() {
+  # Check if the input file exists
+  typeset input_file="$1"
+  if [[ ! -f "$input_file" ]]; then
+    echo "Error: The file '$input_file' does not exist."
+    return 1
+  fi
+  
+  # Initialize variables
+  typeset txt_file="$index_file_path/fileFromTxtfile.idt"
+  typeset tbtoasc_file="$index_file_path/fileFromTbtoasc.idt"
+  typeset keys_file="$index_file_path/keys.txt"
+  
+  # Clear or create the output files to avoid appending to old data
+  > "$txt_file"
+  > "$tbtoasc_file"
+  > "$keys_file"
+
+  cd $(dirname "$input_file")
+
+  # Generate the fileFromTxtfile.idt using stdcomp and filter out unnecessary lines
+  # stdcomp -A : Emit preprocessed data suitable for asctotb
+  stdcomp -A "$(basename "$input_file")" | grep -Eav "\?compiled|SVN iden|SCCS ident" > "$txt_file"
+
+    # Create a list of keys from the file name, replacing underscores with hashes
+  echo "$(basename "$input_file" .idt)" | awk '{ if (match($0,/((([A-Z])+_)*IDGTAB_.*$)/,m)) print m[0] }' | awk '{gsub("_", "#"); print $0}' | awk '{ gsub(".idt",""); print $0 }' 2>/dev/null > "$keys_file"
+
+  # Process each key and append the result to the tbtoasc_file, filtering out unnecessary lines
+  while read -r key; do
+    tbtoasc -w 9999 -e "$key" | grep -Eav "\?compiled|SVN iden|SCCS ident" >> "$tbtoasc_file"
+  done < "$keys_file"
+
+  # Display idt.i files
+  print ""
+  print "idt.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "idt.i" | awk -F'"' '{print $2}' | uniq)"
+
+
+  # Compare the tbtoasc_file with the original file to validate the changes
+  compare_files "$tbtoasc_file" "$txt_file"
+
+  # Display idt file from stdcomp
+  print "File 2 from stdcomp -A : $txt_file"
+  # Display idt.i files
+  print ""
+  print "idt.i file(s) : \n $(cat "$txt_file" | grep -aE "\?line" | grep -aE "idt.i" | awk -F'"' '{print $2}' | uniq)"
   print ""
 }
 
